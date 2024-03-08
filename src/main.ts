@@ -2,7 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import passport from 'passport';
+// import passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 

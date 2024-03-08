@@ -13,7 +13,7 @@ import { PassportModule } from '@nestjs/passport';
     AuthModule,
     PassportModule.register({ session: true }),
   ],
-  // controllers: [AppController],
-  // providers: [AppService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
