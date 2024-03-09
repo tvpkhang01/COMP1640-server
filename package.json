@@ -2,7 +2,7 @@
   "name": "comp1640-server",
   "version": "0.0.1",
   "description": "",
-  "author": "OTTeam",
+  "author": "OT-Team",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -19,7 +19,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "lint:staged": "lint-staged",
-    "prepare": "husky install"
+    "prepare": "test -d node_modules/husky && husky install || echo \"husky is not installed\""
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
