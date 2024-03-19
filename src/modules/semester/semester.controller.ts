@@ -18,16 +18,6 @@ import { GetSemesterParams } from './dto/getList_semester.dto';
 export class SemesterController {
   constructor(private readonly semesterService: SemesterService) {}
 
-  // @Post()
-  // create(@Body() createSemesterDto: CreateSemesterDto) {
-  //   return this.semesterService.create(createSemesterDto);
-  // }
-
-  // @Get()
-  // findAll() {
-  //   return this.semesterService.findAll();
-  // }
-
   @Post()
   async create(@Body() createUserDto: CreateSemesterDto) {
     return this.semesterService.create(createUserDto);
@@ -53,7 +43,12 @@ export class SemesterController {
   }
 
   @Delete(':ID')
-  remove(@Param('ID') ID: string) {
-    return this.semesterService.remove(+ID);
+  async remove(@Param('ID') ID: string) {
+    const result = await this.semesterService.remove(ID);
+    if (result.message) {
+      return { message: result.message };
+    } else {
+      return;
+    }
   }
 }

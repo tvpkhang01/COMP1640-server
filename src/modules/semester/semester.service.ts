@@ -11,6 +11,10 @@ import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 
 @Injectable()
 export class SemesterService {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getSemesterById(ID: string) {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectRepository(Semester)
     private readonly semestersRepository: Repository<Semester>,
@@ -54,6 +58,15 @@ export class SemesterService {
     }
   }
 
+  async remove(ID: string) {
+    const semester = await this.semestersRepository.findOneBy({ ID });
+    if (!semester) {
+      return { message: 'semester not found' };
+    }
+    await this.semestersRepository.softDelete(ID);
+    return { data: null, message: 'Semester deletion successful' };
+  }
+
   findAll() {
     return `This action returns all semester`;
   }
@@ -66,7 +79,7 @@ export class SemesterService {
   //   return `This action updates a #${ID} semester`;
   // }
 
-  remove(ID: number) {
-    return `This action removes a #${ID} semester`;
-  }
+  // remove(ID: number) {
+  //   return `This action removes a #${ID} semester`;
+  // }
 }
