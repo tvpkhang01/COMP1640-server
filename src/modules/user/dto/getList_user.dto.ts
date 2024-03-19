@@ -3,6 +3,7 @@ import { GenderEnum, RoleEnum } from 'src/common/enum/enum';
 
 export class GetUserParams extends PageOptionsDto {
   UserName: string;
+  Password: string;
   Code: string;
   Email: string;
   Gender: GenderEnum;
