@@ -11,6 +11,9 @@ export class User extends AbstractEntity {
   UserName: string;
 
   @Column()
+  Password: string = '123456789';
+
+  @Column()
   Code: string;
 
   @Column()

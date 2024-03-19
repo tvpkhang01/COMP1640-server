@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-
-// import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
@@ -58,8 +56,12 @@ export class UserService {
     const user = await this.usersRepository.findOneBy({ ID });
     if (user) {
       user.UserName = updateUserDto.UserName;
+      user.Password = updateUserDto.Password;
       user.Email = updateUserDto.Email;
       user.Phone = updateUserDto.Phone;
+      user.DateOfBirth = updateUserDto.DateOfBirth;
+      user.Gender = updateUserDto.Gender;
+      user.Role = updateUserDto.Role;
       user.Avatar = updateUserDto.Avatar;
       await this.entityManager.save(user);
       return { user, message: 'Successfully update user' };
