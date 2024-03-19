@@ -29,8 +29,8 @@ export class SemesterController {
   }
 
   @Get(':ID')
-  findOne(@Param('ID') ID: string) {
-    return this.semesterService.findOne(+ID);
+  async findOne(@Param('ID') ID: string) {
+    return this.semesterService.getSemesterById(ID);
   }
 
   @Patch(':ID')

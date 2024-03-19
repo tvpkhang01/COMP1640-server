@@ -11,10 +11,6 @@ import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 
 @Injectable()
 export class SemesterService {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getSemesterById(ID: string) {
-    throw new Error('Method not implemented.');
-  }
   constructor(
     @InjectRepository(Semester)
     private readonly semestersRepository: Repository<Semester>,
@@ -39,6 +35,14 @@ export class SemesterService {
       pageOptionsDto: params,
     });
     return new ResponsePaginate(result, pageMetaDto, 'Success');
+  }
+  async getSemesterById(ID: string) {
+    const semester = await this.semestersRepository
+      .createQueryBuilder('semester')
+      .select(['semester'])
+      .where('semester.ID = :ID', { ID })
+      .getOne();
+    return semester;
   }
   async create(createSemesterDto: CreateSemesterDto) {
     const semester = new Semester(createSemesterDto);
@@ -65,14 +69,6 @@ export class SemesterService {
     }
     await this.semestersRepository.softDelete(ID);
     return { data: null, message: 'Semester deletion successful' };
-  }
-
-  findAll() {
-    return `This action returns all semester`;
-  }
-
-  findOne(ID: number) {
-    return `This action returns a #${ID} semester`;
   }
 
   // update(ID: string, updateSemesterDto: UpdateSemesterDto) {
