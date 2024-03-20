@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-
-// import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
@@ -9,6 +7,7 @@ import { GetUserParams } from './dto/getList_user.dto';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -41,17 +40,44 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const user = new User(createUserDto);
     await this.entityManager.save(user);
-    return { user, message: 'Successfully create employee' };
-  }
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return { user, message: 'Successfully create user' };
   }
 
-  // update(id: number, updateUserDto: UpdateUserDto) {
-  //   return `This action updates a #${id} user`;
+  async getUserById(ID: string) {
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .select(['user'])
+      .where('user.ID = :ID', { ID })
+      .getOne();
+    return user;
+  }
+
+  async update(ID: string, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOneBy({ ID });
+    if (user) {
+      user.UserName = updateUserDto.UserName;
+      user.Password = updateUserDto.Password;
+      user.Email = updateUserDto.Email;
+      user.Phone = updateUserDto.Phone;
+      user.DateOfBirth = updateUserDto.DateOfBirth;
+      user.Gender = updateUserDto.Gender;
+      user.Role = updateUserDto.Role;
+      user.Avatar = updateUserDto.Avatar;
+      await this.entityManager.save(user);
+      return { user, message: 'Successfully update user' };
+    }
+  }
+
+  // remove(id: number) {
+  //   return `This action removes a #${id} user`;
   // }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(ID: string) {
+    const user = await this.usersRepository.findOneBy({ ID });
+    if (!user) {
+      return { message: 'User not found' };
+    }
+    await this.usersRepository.softDelete(ID);
+    return { data: null, message: 'User deletion successful' };
   }
 }

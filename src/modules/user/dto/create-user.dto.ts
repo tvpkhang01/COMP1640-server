@@ -20,7 +20,6 @@ export class CreateUserDto {
   @IsNotEmpty()
   DateOfBirth: Date;
 
-  @IsNotEmpty()
   Role: RoleEnum;
 
   @IsNotEmpty()
