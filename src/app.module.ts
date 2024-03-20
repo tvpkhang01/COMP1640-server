@@ -4,9 +4,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DbModule } from './common/db/db.module';
 import { UserModule } from './modules/user/user.module';
+import { SemesterModule } from './modules/semester/semester.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), DbModule, UserModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    DbModule,
+    UserModule,
+    SemesterModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
