@@ -1,6 +1,13 @@
 import { GenderEnum, RoleEnum } from 'src/common/enum/enum';
 import { AbstractEntity } from 'src/common/entities/abstract.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Faculty } from './faculty.entity';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -39,8 +46,12 @@ export class User extends AbstractEntity {
   })
   Role: RoleEnum;
 
-  @Column({ default: false })
-  Faculty: string;
+  @Column()
+  facultyId: string;
+
+  @ManyToOne(() => Faculty, (faculty) => faculty.user)
+  @JoinColumn({ name: 'facultyId', referencedColumnName: 'ID' })
+  Faculty: Faculty;
 
   constructor(user: Partial<User>) {
     super();

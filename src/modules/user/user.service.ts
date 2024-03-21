@@ -17,15 +17,22 @@ export class UserService {
     private readonly entityManager: EntityManager,
   ) {}
 
+  async create(createUserDto: CreateUserDto) {
+    const user = new User(createUserDto);
+    await this.entityManager.save(user);
+    return { user, message: 'Successfully create user' };
+  }
+
   async getUsers(params: GetUserParams) {
     const users = this.usersRepository
       .createQueryBuilder('user')
-      .select(['user'])
+      .select(['user', 'Faculty.FacultyName'])
+      .leftJoin('user.Faculty', 'Faculty')
       .skip(params.skip)
       .take(params.take)
       .orderBy('user.createdAt', Order.DESC);
     if (params.search) {
-      users.andWhere('project.name ILIKE :UserName', {
+      users.andWhere('user.name ILIKE :UserName', {
         name: `%${params.search}%`,
       });
     }
@@ -37,16 +44,11 @@ export class UserService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const user = new User(createUserDto);
-    await this.entityManager.save(user);
-    return { user, message: 'Successfully create user' };
-  }
-
   async getUserById(ID: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .select(['user'])
+      .select(['user', 'Faculty.FacultyName'])
+      .leftJoin('user.Faculty', 'Faculty')
       .where('user.ID = :ID', { ID })
       .getOne();
     return user;
@@ -67,10 +69,6 @@ export class UserService {
       return { user, message: 'Successfully update user' };
     }
   }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} user`;
-  // }
 
   async remove(ID: string) {
     const user = await this.usersRepository.findOneBy({ ID });
