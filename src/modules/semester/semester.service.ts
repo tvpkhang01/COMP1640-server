@@ -17,19 +17,19 @@ export class SemesterService {
     private readonly entityManager: EntityManager,
   ) {}
   async getSemesters(params: GetSemesterParams) {
-    const users = this.semestersRepository
-      .createQueryBuilder('user')
-      .select(['user'])
+    const semesters = this.semestersRepository
+      .createQueryBuilder('semester')
+      .select(['semester'])
       .skip(params.skip)
       .take(params.take)
-      .orderBy('user.createdAt', Order.DESC);
+      .orderBy('semester.createdAt', Order.DESC);
     if (params.search) {
-      users.andWhere('project.name ILIKE :UserName', {
+      semesters.andWhere('project.name ILIKE :SemesterName', {
         name: `%${params.search}%`,
       });
     }
 
-    const [result, total] = await users.getManyAndCount();
+    const [result, total] = await semesters.getManyAndCount();
     const pageMetaDto = new PageMetaDto({
       itemCount: total,
       pageOptionsDto: params,
