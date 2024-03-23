@@ -1,14 +1,6 @@
 import { AbstractEntity } from 'src/common/entities/abstract.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { ContentTypeEnum, StatusEnum, TermEnum } from 'src/common/enum/enum';
-// import { Faculty } from './faculty.entity';
-import { User } from './user.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { StatusEnum, TermEnum } from 'src/common/enum/enum';
 
 @Entity()
 export class Contribution extends AbstractEntity {
@@ -17,13 +9,6 @@ export class Contribution extends AbstractEntity {
 
   @Column()
   Title: string;
-
-  @Column({
-    type: 'enum',
-    enum: ContentTypeEnum,
-    nullable: true,
-  })
-  ContentType: ContentTypeEnum;
 
   @Column({ nullable: true })
   FilePath: string;
@@ -44,12 +29,12 @@ export class Contribution extends AbstractEntity {
   })
   Term: TermEnum;
 
-  // User/Student relationship
-  @Column()
-  studentId: string;
-  @ManyToOne(() => User, (user) => user.Contribution)
-  @JoinColumn({ name: 'studentId', referencedColumnName: 'ID' })
-  Student: User;
+  //   @Column()
+  //   facultyId: string;
+
+  //   @ManyToOne(() => Faculty, (faculty) => faculty.user)
+  //   @JoinColumn({ name: 'facultyId', referencedColumnName: 'ID' })
+  //   Faculty: Faculty;
 
   constructor(contribution: Partial<Contribution>) {
     super();
