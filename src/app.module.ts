@@ -6,6 +6,7 @@ import { DbModule } from './common/db/db.module';
 import { UserModule } from './modules/user/user.module';
 import { SemesterModule } from './modules/semester/semester.module';
 import { FacultyModule } from './modules/faculty/faculty.module';
+import { ContributionModule } from './modules/contribution/contribution.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { FacultyModule } from './modules/faculty/faculty.module';
     UserModule,
     SemesterModule,
     FacultyModule,
+    ContributionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -33,7 +33,7 @@ export class UserService {
       .orderBy('user.createdAt', Order.DESC);
     if (params.search) {
       users.andWhere('user.name ILIKE :UserName', {
-        name: `%${params.search}%`,
+        UserName: `%${params.search}%`,
       });
     }
     const [result, total] = await users.getManyAndCount();

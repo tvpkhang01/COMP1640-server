@@ -46,7 +46,7 @@ export class User extends AbstractEntity {
   })
   Role: RoleEnum;
 
-  @Column()
+  @Column({ nullable: true })
   facultyId: string;
 
   @ManyToOne(() => Faculty, (faculty) => faculty.user)
