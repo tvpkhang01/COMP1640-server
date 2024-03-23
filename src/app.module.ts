@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { DbModule } from './common/db/db.module';
 import { UserModule } from './modules/user/user.module';
 import { SemesterModule } from './modules/semester/semester.module';
+import { MagazineModule } from './modules/magazine/magazine.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { SemesterModule } from './modules/semester/semester.module';
     DbModule,
     UserModule,
     SemesterModule,
+    MagazineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

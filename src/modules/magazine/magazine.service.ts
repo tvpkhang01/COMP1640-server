@@ -57,7 +57,6 @@ export class MagazineService {
       magazine.MagazineName = updateMagazineDto.MagazineName;
       magazine.OpenDate = updateMagazineDto.OpenDate;
       magazine.CloseDate = updateMagazineDto.CloseDate;
-      magazine.FinalCloseDate = updateMagazineDto.FinalCloseDate;
 
       await this.entityManager.save(magazine);
       return { magazine, message: 'Successfully update magazine' };

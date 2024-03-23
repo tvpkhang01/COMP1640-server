@@ -18,11 +18,8 @@ export class Magazine extends AbstractEntity {
   @Column()
   CloseDate: Date;
 
-  @Column()
-  FinalCloseDate: Date;
-
-  constructor(semester: Partial<Magazine>) {
+  constructor(magazine: Partial<Magazine>) {
     super();
-    Object.assign(this, semester);
+    Object.assign(this, magazine);
   }
 }

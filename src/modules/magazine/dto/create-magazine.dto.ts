@@ -12,7 +12,4 @@ export class CreateMagazineDto {
 
   @IsNotEmpty()
   CloseDate: Date;
-
-  @IsNotEmpty()
-  FinalCloseDate: Date;
 }
