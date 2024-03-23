@@ -10,6 +10,6 @@ export class GetUserParams extends PageOptionsDto {
   Phone: string;
   DateOfBirth: Date;
   Role: RoleEnum;
-  Faculty: string;
+  facultyId: string;
   Avatar: string;
 }

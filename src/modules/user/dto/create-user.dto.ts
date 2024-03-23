@@ -23,7 +23,7 @@ export class CreateUserDto {
   Role: RoleEnum;
 
   @IsNotEmpty()
-  Faculty: string;
+  facultyId: string;
 
   Avatar: string;
 }

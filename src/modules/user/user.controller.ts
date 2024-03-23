@@ -33,11 +33,6 @@ export class UserController {
     return this.userService.getUserById(ID);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
-
   @Patch(':ID')
   async update(
     @Param('ID') ID: string,
@@ -47,10 +42,6 @@ export class UserController {
     return { result, message: 'Successfully update user' };
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
   @Delete(':ID')
   async remove(@Param('ID') ID: string) {
     const result = await this.userService.remove(ID);
