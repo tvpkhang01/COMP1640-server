@@ -13,6 +13,11 @@ export enum StatusEnum {
   REJECT = 'reject',
 }
 
+export enum ContentTypeEnum {
+  IMAGE = 'img',
+  DOCX = 'docx',
+}
+
 export enum RoleEnum {
   ADMIN = 'admin',
   STUDENT = 'student',
