@@ -56,6 +56,9 @@ export class UserService {
 
   async update(ID: string, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneBy({ ID });
+    if (!user) {
+      return { message: 'User not found' };
+    }
     if (user) {
       user.UserName = updateUserDto.UserName;
       user.Password = updateUserDto.Password;

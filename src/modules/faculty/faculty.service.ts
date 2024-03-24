@@ -8,6 +8,7 @@ import { GetFacultyParams } from './dto/getList_faculty.dto';
 import { Order } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class FacultyService {
@@ -56,6 +57,9 @@ export class FacultyService {
 
   async update(ID: string, updateUserDto: UpdateFacultyDto) {
     const faculty = await this.facultiesRepository.findOneBy({ ID });
+    if (!faculty) {
+      return { message: 'Faculty not found' };
+    }
     if (faculty) {
       faculty.FacultyName = updateUserDto.FacultyName;
       await this.entityManager.save(faculty);
@@ -64,9 +68,18 @@ export class FacultyService {
   }
 
   async remove(ID: string) {
-    const faculty = await this.facultiesRepository.findOneBy({ ID });
+    const faculty = await this.facultiesRepository
+      .createQueryBuilder('faculty')
+      .leftJoinAndSelect('faculty.Student', 'Student')
+      .where('faculty.ID = :ID', { ID })
+      .getOne();
     if (!faculty) {
       return { message: 'Faculty not found' };
+    }
+    if (faculty.Student.length > 0) {
+      for (const student of faculty.Student) {
+        await this.entityManager.softDelete(User, { ID: student.ID });
+      }
     }
     await this.facultiesRepository.softDelete(ID);
     return { data: null, message: 'Faculty deletion successful' };

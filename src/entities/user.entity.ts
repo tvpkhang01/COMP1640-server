@@ -51,7 +51,7 @@ export class User extends AbstractEntity {
   // Faculty relationship
   @Column({ nullable: true })
   facultyId: string;
-  @ManyToOne(() => Faculty, (faculty) => faculty.user)
+  @ManyToOne(() => Faculty, (faculty) => faculty.Student)
   @JoinColumn({ name: 'facultyId', referencedColumnName: 'ID' })
   Faculty: Faculty;
 

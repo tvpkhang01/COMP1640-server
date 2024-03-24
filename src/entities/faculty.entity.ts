@@ -24,7 +24,7 @@ export class Faculty extends AbstractEntity {
     cascade: true,
     onUpdate: 'CASCADE',
   })
-  user: User[];
+  Student: User[];
 
   @OneToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'mCoordinatorId', referencedColumnName: 'ID' })
