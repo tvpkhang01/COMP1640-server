@@ -5,9 +5,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Faculty } from './faculty.entity';
+import { Contribution } from './contribution.entity';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -46,12 +48,19 @@ export class User extends AbstractEntity {
   })
   Role: RoleEnum;
 
+  // Faculty relationship
   @Column({ nullable: true })
   facultyId: string;
-
   @ManyToOne(() => Faculty, (faculty) => faculty.user)
   @JoinColumn({ name: 'facultyId', referencedColumnName: 'ID' })
   Faculty: Faculty;
+
+  // Contribution relationship
+  @OneToMany(() => Contribution, (contribution) => contribution.Student, {
+    cascade: true,
+    onUpdate: 'CASCADE',
+  })
+  contribution: Contribution[];
 
   constructor(user: Partial<User>) {
     super();

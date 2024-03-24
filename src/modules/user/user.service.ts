@@ -32,7 +32,7 @@ export class UserService {
       .take(params.take)
       .orderBy('user.createdAt', Order.DESC);
     if (params.search) {
-      users.andWhere('user.name ILIKE :UserName', {
+      users.andWhere('user.UserName ILIKE :UserName', {
         UserName: `%${params.search}%`,
       });
     }

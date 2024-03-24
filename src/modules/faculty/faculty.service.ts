@@ -47,7 +47,8 @@ export class FacultyService {
   async getFacultyById(ID: string) {
     const faculty = await this.facultiesRepository
       .createQueryBuilder('faculty')
-      .select(['faculty'])
+      .select(['faculty', 'MCoordinator'])
+      .leftJoin('faculty.MCoordinator', 'MCoordinator')
       .where('faculty.ID = :ID', { ID })
       .getOne();
     return faculty;

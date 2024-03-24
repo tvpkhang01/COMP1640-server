@@ -26,12 +26,13 @@ export class ContributionService {
   async getContributions(params: GetContributionParams) {
     const contributions = this.contributionsRepository
       .createQueryBuilder('contribution')
-      .select(['contribution'])
+      .select(['contribution', 'Student'])
+      .leftJoin('contribution.Student', 'Student')
       .skip(params.skip)
       .take(params.take)
       .orderBy('contribution.createdAt', Order.DESC);
     if (params.search) {
-      contributions.andWhere('contribution.name ILIKE :Title', {
+      contributions.andWhere('contribution.Title ILIKE :Title', {
         Title: `%${params.search}%`,
       });
     }
@@ -46,7 +47,8 @@ export class ContributionService {
   async getContributionById(ID: string) {
     const contribution = await this.contributionsRepository
       .createQueryBuilder('contribution')
-      .select(['contribution'])
+      .select(['contribution', 'Student'])
+      .leftJoin('contribution.Student', 'Student')
       .where('contribution.ID = :ID', { ID })
       .getOne();
     return contribution;
