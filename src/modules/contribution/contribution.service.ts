@@ -33,7 +33,7 @@ export class ContributionService {
       .orderBy('contribution.createdAt', Order.DESC);
     if (params.search) {
       contributions.andWhere('contribution.title ILIKE :title', {
-        Title: `%${params.search}%`,
+        title: `%${params.search}%`,
       });
     }
     const [result, total] = await contributions.getManyAndCount();
