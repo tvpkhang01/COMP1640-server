@@ -47,7 +47,7 @@ export class Contribution extends AbstractEntity {
   // User/Student relationship
   @Column()
   studentId: string;
-  @ManyToOne(() => User, (user) => user.contribution)
+  @ManyToOne(() => User, (user) => user.Contribution)
   @JoinColumn({ name: 'studentId', referencedColumnName: 'ID' })
   Student: User;
 

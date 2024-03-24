@@ -60,7 +60,7 @@ export class User extends AbstractEntity {
     cascade: true,
     onUpdate: 'CASCADE',
   })
-  contribution: Contribution[];
+  Contribution: Contribution[];
 
   constructor(user: Partial<User>) {
     super();
