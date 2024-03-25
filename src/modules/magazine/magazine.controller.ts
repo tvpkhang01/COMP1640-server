@@ -28,23 +28,23 @@ export class MagazineController {
     return this.magazineService.getMagazines(params);
   }
 
-  @Get(':ID')
-  async findOne(@Param('ID') ID: string) {
-    return this.magazineService.getMagazineById(ID);
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.magazineService.getMagazineById(id);
   }
 
-  @Patch(':ID')
+  @Patch(':id')
   async update(
-    @Param('ID') ID: string,
+    @Param('id') id: string,
     @Body(new ValidationPipe()) updateMagazineDto: UpdateMagazineDto,
   ) {
-    const result = await this.magazineService.update(ID, updateMagazineDto);
+    const result = await this.magazineService.update(id, updateMagazineDto);
     return { result, message: 'Successfully update magazine' };
   }
 
-  @Delete(':ID')
-  async remove(@Param('ID') ID: string) {
-    const result = await this.magazineService.remove(ID);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const result = await this.magazineService.remove(id);
     if (result.message) {
       return { message: result.message };
     } else {

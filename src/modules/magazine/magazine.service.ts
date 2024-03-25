@@ -19,12 +19,13 @@ export class MagazineService {
   async getMagazines(params: GetMagazineParams) {
     const magazines = this.magazinesRepository
       .createQueryBuilder('magazine')
-      .select(['magazine'])
+      .select(['magazine', 'semester'])
+      .leftJoin('magazine.semester', 'semester')
       .skip(params.skip)
       .take(params.take)
       .orderBy('magazine.createdAt', Order.DESC);
     if (params.search) {
-      magazines.andWhere('project.name ILIKE :MagazineName', {
+      magazines.andWhere('project.name ILIKE :magazineName', {
         name: `%${params.search}%`,
       });
     }
@@ -36,11 +37,12 @@ export class MagazineService {
     });
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
-  async getMagazineById(ID: string) {
+  async getMagazineById(id: string) {
     const magazine = await this.magazinesRepository
       .createQueryBuilder('magazine')
-      .select(['magazine'])
-      .where('magazine.ID = :ID', { ID })
+      .select(['magazine', 'semester'])
+      .leftJoin('magazine.semester', 'semester')
+      .where('magazine.id = :id', { id })
       .getOne();
     return magazine;
   }
@@ -50,25 +52,25 @@ export class MagazineService {
     return { magazine, message: 'Successfully create magazine' };
   }
 
-  async update(ID: string, updateMagazineDto: UpdateMagazineDto) {
-    const magazine = await this.magazinesRepository.findOneBy({ ID });
+  async update(id: string, updateMagazineDto: UpdateMagazineDto) {
+    const magazine = await this.magazinesRepository.findOneBy({ id });
     if (magazine) {
-      magazine.SemesterID = updateMagazineDto.SemesterID;
-      magazine.MagazineName = updateMagazineDto.MagazineName;
-      magazine.OpenDate = updateMagazineDto.OpenDate;
-      magazine.CloseDate = updateMagazineDto.CloseDate;
+      magazine.semesterId = updateMagazineDto.semesterId;
+      magazine.magazineName = updateMagazineDto.magazineName;
+      magazine.openDate = updateMagazineDto.openDate;
+      magazine.closeDate = updateMagazineDto.closeDate;
 
       await this.entityManager.save(magazine);
       return { magazine, message: 'Successfully update magazine' };
     }
   }
 
-  async remove(ID: string) {
-    const magazine = await this.magazinesRepository.findOneBy({ ID });
+  async remove(id: string) {
+    const magazine = await this.magazinesRepository.findOneBy({ id });
     if (!magazine) {
       return { message: 'magazine not found' };
     }
-    await this.magazinesRepository.softDelete(ID);
+    await this.magazinesRepository.softDelete(id);
     return { data: null, message: 'Magazine deletion successful' };
   }
 

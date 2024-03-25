@@ -28,23 +28,23 @@ export class SemesterController {
     return this.semesterService.getSemesters(params);
   }
 
-  @Get(':ID')
-  async findOne(@Param('ID') ID: string) {
-    return this.semesterService.getSemesterById(ID);
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.semesterService.getSemesterById(id);
   }
 
-  @Patch(':ID')
+  @Patch(':id')
   async update(
-    @Param('ID') ID: string,
+    @Param('id') id: string,
     @Body(new ValidationPipe()) updateSemesterDto: UpdateSemesterDto,
   ) {
-    const result = await this.semesterService.update(ID, updateSemesterDto);
+    const result = await this.semesterService.update(id, updateSemesterDto);
     return { result, message: 'Successfully update user' };
   }
 
-  @Delete(':ID')
-  async remove(@Param('ID') ID: string) {
-    const result = await this.semesterService.remove(ID);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const result = await this.semesterService.remove(id);
     if (result.message) {
       return { message: result.message };
     } else {

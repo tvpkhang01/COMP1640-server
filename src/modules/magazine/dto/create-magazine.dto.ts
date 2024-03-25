@@ -2,14 +2,14 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreateMagazineDto {
   @IsNotEmpty()
-  SemesterID: string;
+  semesterId: string;
 
   @IsNotEmpty()
-  MagazineName: string;
+  magazineName: string;
 
   @IsNotEmpty()
-  OpenDate: Date;
+  openDate: Date;
 
   @IsNotEmpty()
-  CloseDate: Date;
+  closeDate: Date;
 }
