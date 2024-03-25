@@ -28,23 +28,23 @@ export class FacultyController {
     return this.facultyService.getFaculties(params);
   }
 
-  @Get(':ID')
-  async findOne(@Param('ID') ID: string) {
-    return this.facultyService.getFacultyById(ID);
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.facultyService.getFacultyById(id);
   }
 
-  @Patch(':ID')
+  @Patch(':id')
   async update(
-    @Param('ID') ID: string,
+    @Param('id') id: string,
     @Body(new ValidationPipe()) updateFacultyDto: UpdateFacultyDto,
   ) {
-    const result = await this.facultyService.update(ID, updateFacultyDto);
+    const result = await this.facultyService.update(id, updateFacultyDto);
     return { result, message: 'Successfully update faculty' };
   }
 
-  @Delete(':ID')
-  async remove(@Param('ID') ID: string) {
-    const result = await this.facultyService.remove(ID);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const result = await this.facultyService.remove(id);
     if (result.message) {
       return { message: result.message };
     } else {

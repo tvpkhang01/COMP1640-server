@@ -26,14 +26,14 @@ export class ContributionService {
   async getContributions(params: GetContributionParams) {
     const contributions = this.contributionsRepository
       .createQueryBuilder('contribution')
-      .select(['contribution', 'Student'])
-      .leftJoin('contribution.Student', 'Student')
+      .select(['contribution', 'student'])
+      .leftJoin('contribution.student', 'student')
       .skip(params.skip)
       .take(params.take)
       .orderBy('contribution.createdAt', Order.DESC);
     if (params.search) {
-      contributions.andWhere('contribution.Title ILIKE :Title', {
-        Title: `%${params.search}%`,
+      contributions.andWhere('contribution.title ILIKE :title', {
+        title: `%${params.search}%`,
       });
     }
     const [result, total] = await contributions.getManyAndCount();
@@ -44,31 +44,36 @@ export class ContributionService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
-  async getContributionById(ID: string) {
+  async getContributionById(id: string) {
     const contribution = await this.contributionsRepository
       .createQueryBuilder('contribution')
-      .select(['contribution', 'Student'])
-      .leftJoin('contribution.Student', 'Student')
-      .where('contribution.ID = :ID', { ID })
+      .select(['contribution', 'student'])
+      .leftJoin('contribution.student', 'student')
+      .where('contribution.id = :id', { id })
       .getOne();
     return contribution;
   }
 
-  async update(ID: string, updateContributionDto: UpdateContributionDto) {
-    const contribution = await this.contributionsRepository.findOneBy({ ID });
+  async update(id: string, updateContributionDto: UpdateContributionDto) {
+    const contribution = await this.contributionsRepository.findOneBy({ id });
+    if (!contribution) {
+      return { message: 'Contribution not found' };
+    }
     if (contribution) {
-      contribution.Title = updateContributionDto.Title;
+      contribution.title = updateContributionDto.title;
+      contribution.filePaths = updateContributionDto.filePaths;
+      contribution.status = updateContributionDto.status;
       await this.entityManager.save(contribution);
       return { contribution, message: 'Successfully update contribution' };
     }
   }
 
-  async remove(ID: string) {
-    const contribution = await this.contributionsRepository.findOneBy({ ID });
+  async remove(id: string) {
+    const contribution = await this.contributionsRepository.findOneBy({ id });
     if (!contribution) {
       return { message: 'Contribution not found' };
     }
-    await this.contributionsRepository.softDelete(ID);
+    await this.contributionsRepository.softDelete(id);
     return { data: null, message: 'Contribution deletion successful' };
   }
 }
