@@ -3,7 +3,7 @@ import { StatusEnum, TermEnum } from 'src/common/enum/enum';
 
 export class GetContributionParams extends PageOptionsDto {
   Title: string;
-  FilePath: string;
+  FilePaths: { Value: string }[];
   Status: StatusEnum;
   Term: TermEnum;
 }
