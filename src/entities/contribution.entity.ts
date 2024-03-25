@@ -6,8 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ContentTypeEnum, StatusEnum, TermEnum } from 'src/common/enum/enum';
-// import { Faculty } from './faculty.entity';
+import { StatusEnum, TermEnum } from 'src/common/enum/enum';
 import { User } from './user.entity';
 
 @Entity()
@@ -18,15 +17,8 @@ export class Contribution extends AbstractEntity {
   @Column()
   Title: string;
 
-  @Column({
-    type: 'enum',
-    enum: ContentTypeEnum,
-    nullable: true,
-  })
-  ContentType: ContentTypeEnum;
-
-  @Column({ nullable: true })
-  FilePath: string;
+  @Column('json')
+  FilePaths: { Value: string }[];
 
   @Column({
     type: 'enum',

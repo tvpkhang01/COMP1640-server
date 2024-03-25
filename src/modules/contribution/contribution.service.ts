@@ -58,6 +58,8 @@ export class ContributionService {
     const contribution = await this.contributionsRepository.findOneBy({ ID });
     if (contribution) {
       contribution.Title = updateContributionDto.Title;
+      contribution.FilePaths = updateContributionDto.FilePaths;
+      contribution.Status = updateContributionDto.Status;
       await this.entityManager.save(contribution);
       return { contribution, message: 'Successfully update contribution' };
     }

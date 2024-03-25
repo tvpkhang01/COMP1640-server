@@ -5,7 +5,7 @@ export class CreateContributionDto {
   @IsNotEmpty()
   Title: string;
 
-  FilePath: string;
+  FilePaths: { Value: string }[];
 
   Status: StatusEnum;
 
