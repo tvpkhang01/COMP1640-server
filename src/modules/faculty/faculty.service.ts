@@ -62,6 +62,7 @@ export class FacultyService {
     }
     if (faculty) {
       faculty.facultyName = updateUserDto.facultyName;
+      faculty.mCoordinatorId = updateUserDto.mCoordinatorId;
       await this.entityManager.save(faculty);
       return { faculty, message: 'Successfully update faculty' };
     }

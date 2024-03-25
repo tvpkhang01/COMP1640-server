@@ -56,6 +56,9 @@ export class ContributionService {
 
   async update(id: string, updateContributionDto: UpdateContributionDto) {
     const contribution = await this.contributionsRepository.findOneBy({ id });
+    if (!contribution) {
+      return { message: 'Contribution not found' };
+    }
     if (contribution) {
       contribution.title = updateContributionDto.title;
       contribution.filePaths = updateContributionDto.filePaths;
