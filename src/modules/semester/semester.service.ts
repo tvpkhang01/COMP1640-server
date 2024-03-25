@@ -8,6 +8,7 @@ import { GetSemesterParams } from './dto/getList_semester.dto';
 import { Order } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
+import { Magazine } from 'src/entities/magazine.entity';
 
 @Injectable()
 export class SemesterService {
@@ -17,30 +18,30 @@ export class SemesterService {
     private readonly entityManager: EntityManager,
   ) {}
   async getSemesters(params: GetSemesterParams) {
-    const users = this.semestersRepository
-      .createQueryBuilder('user')
-      .select(['user'])
+    const semesters = this.semestersRepository
+      .createQueryBuilder('semester')
+      .select(['semester'])
       .skip(params.skip)
       .take(params.take)
-      .orderBy('user.createdAt', Order.DESC);
+      .orderBy('semester.createdAt', Order.DESC);
     if (params.search) {
-      users.andWhere('project.name ILIKE :UserName', {
+      semesters.andWhere('project.name ILIKE :SemesterName', {
         name: `%${params.search}%`,
       });
     }
 
-    const [result, total] = await users.getManyAndCount();
+    const [result, total] = await semesters.getManyAndCount();
     const pageMetaDto = new PageMetaDto({
       itemCount: total,
       pageOptionsDto: params,
     });
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
-  async getSemesterById(ID: string) {
+  async getSemesterById(id: string) {
     const semester = await this.semestersRepository
       .createQueryBuilder('semester')
       .select(['semester'])
-      .where('semester.ID = :ID', { ID })
+      .where('semester.id = :id', { id })
       .getOne();
     return semester;
   }
@@ -50,24 +51,35 @@ export class SemesterService {
     return { semester, message: 'Successfully create semester' };
   }
 
-  async update(ID: string, updateSemesterDto: UpdateSemesterDto) {
-    const semester = await this.semestersRepository.findOneBy({ ID });
+  async update(id: string, updateSemesterDto: UpdateSemesterDto) {
+    const semester = await this.semestersRepository.findOneBy({ id });
     if (semester) {
-      semester.SemesterName = updateSemesterDto.SemesterName;
-      semester.StartDate = updateSemesterDto.StartDate;
-      semester.EndDate = updateSemesterDto.EndDate;
+      semester.semesterName = updateSemesterDto.semesterName;
+      semester.startDate = updateSemesterDto.startDate;
+      semester.endDate = updateSemesterDto.endDate;
 
       await this.entityManager.save(semester);
       return { semester, message: 'Successfully update semester' };
     }
   }
 
-  async remove(ID: string) {
-    const semester = await this.semestersRepository.findOneBy({ ID });
+  async remove(id: string) {
+    const semester = await this.semestersRepository
+      .createQueryBuilder('semester')
+      .leftJoinAndSelect('semester.magazine', 'magazine')
+      .where('semester.id = :id', { id })
+      .getOne();
     if (!semester) {
-      return { message: 'semester not found' };
+      return { message: 'Semmester not found' };
     }
-    await this.semestersRepository.softDelete(ID);
+    if (semester.magazine.length > 0) {
+      for (const magazine of semester.magazine) {
+        await this.entityManager.softDelete(Magazine, {
+          id: magazine.id,
+        });
+      }
+    }
+    await this.semestersRepository.softDelete(id);
     return { data: null, message: 'Semester deletion successful' };
   }
 

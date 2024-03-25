@@ -2,11 +2,11 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreateSemesterDto {
   @IsNotEmpty()
-  SemesterName: string;
+  semesterName: string;
 
   @IsNotEmpty()
-  StartDate: Date;
+  startDate: Date;
 
   @IsNotEmpty()
-  EndDate: Date;
+  endDate: Date;
 }

@@ -1,19 +1,26 @@
 import { AbstractEntity } from 'src/common/entities';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Magazine } from './magazine.entity';
 
 @Entity()
 export class Semester extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
-  ID: string;
+  id: string;
 
   @Column()
-  SemesterName: string;
+  semesterName: string;
 
   @Column()
-  StartDate: Date;
+  startDate: Date;
 
   @Column()
-  EndDate: Date;
+  endDate: Date;
+
+  @OneToMany(() => Magazine, (magazine) => magazine.semester, {
+    cascade: true,
+    onUpdate: 'CASCADE',
+  })
+  magazine: Magazine[];
 
   constructor(semester: Partial<Semester>) {
     super();
