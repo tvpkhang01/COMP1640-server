@@ -6,27 +6,19 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ContentTypeEnum, StatusEnum, TermEnum } from 'src/common/enum/enum';
-// import { Faculty } from './faculty.entity';
+import { StatusEnum, TermEnum } from 'src/common/enum/enum';
 import { User } from './user.entity';
 
 @Entity()
 export class Contribution extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
-  ID: string;
+  id: string;
 
   @Column()
-  Title: string;
+  title: string;
 
-  @Column({
-    type: 'enum',
-    enum: ContentTypeEnum,
-    nullable: true,
-  })
-  ContentType: ContentTypeEnum;
-
-  @Column({ nullable: true })
-  FilePath: string;
+  @Column('json')
+  filePaths: { value: string }[];
 
   @Column({
     type: 'enum',
@@ -34,7 +26,7 @@ export class Contribution extends AbstractEntity {
     default: StatusEnum.REJECT,
     nullable: false,
   })
-  Status: StatusEnum;
+  status: StatusEnum;
 
   @Column({
     type: 'enum',
@@ -42,14 +34,14 @@ export class Contribution extends AbstractEntity {
     default: TermEnum.DISAGREE,
     nullable: false,
   })
-  Term: TermEnum;
+  term: TermEnum;
 
   // User/Student relationship
   @Column()
   studentId: string;
-  @ManyToOne(() => User, (user) => user.Contribution)
-  @JoinColumn({ name: 'studentId', referencedColumnName: 'ID' })
-  Student: User;
+  @ManyToOne(() => User, (user) => user.contribution)
+  @JoinColumn({ name: 'studentId', referencedColumnName: 'id' })
+  student: User;
 
   constructor(contribution: Partial<Contribution>) {
     super();

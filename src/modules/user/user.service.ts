@@ -27,14 +27,14 @@ export class UserService {
   async getUsers(params: GetUserParams) {
     const users = this.usersRepository
       .createQueryBuilder('user')
-      .select(['user', 'Faculty.FacultyName'])
-      .leftJoin('user.Faculty', 'Faculty')
+      .select(['user', 'faculty.facultyName'])
+      .leftJoin('user.faculty', 'faculty')
       .skip(params.skip)
       .take(params.take)
       .orderBy('user.createdAt', Order.DESC);
     if (params.search) {
-      users.andWhere('user.UserName ILIKE :UserName', {
-        UserName: `%${params.search}%`,
+      users.andWhere('user.userName ILIKE :userName', {
+        userName: `%${params.search}%`,
       });
     }
     const [result, total] = await users.getManyAndCount();
@@ -45,52 +45,52 @@ export class UserService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
-  async getUserById(ID: string) {
+  async getUserById(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .select(['user', 'Faculty.FacultyName'])
-      .leftJoin('user.Faculty', 'Faculty')
-      .where('user.ID = :ID', { ID })
+      .select(['user', 'faculty.facultyName'])
+      .leftJoin('user.faculty', 'faculty')
+      .where('user.id = :ID', { id })
       .getOne();
     return user;
   }
 
-  async update(ID: string, updateUserDto: UpdateUserDto) {
-    const user = await this.usersRepository.findOneBy({ ID });
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
       return { message: 'User not found' };
     }
     if (user) {
-      user.UserName = updateUserDto.UserName;
-      user.Password = updateUserDto.Password;
-      user.Email = updateUserDto.Email;
-      user.Phone = updateUserDto.Phone;
-      user.DateOfBirth = updateUserDto.DateOfBirth;
-      user.Gender = updateUserDto.Gender;
-      user.Role = updateUserDto.Role;
-      user.Avatar = updateUserDto.Avatar;
+      user.userName = updateUserDto.userName;
+      user.password = updateUserDto.password;
+      user.email = updateUserDto.email;
+      user.phone = updateUserDto.phone;
+      user.dateOfBirth = updateUserDto.dateOfBirth;
+      user.gender = updateUserDto.gender;
+      user.role = updateUserDto.role;
+      user.avatar = updateUserDto.avatar;
       await this.entityManager.save(user);
       return { user, message: 'Successfully update user' };
     }
   }
 
-  async remove(ID: string) {
+  async remove(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.Contribution', 'Contribution')
-      .where('user.ID = :ID', { ID })
+      .leftJoinAndSelect('user.contribution', 'contribution')
+      .where('user.id = :id', { id })
       .getOne();
     if (!user) {
       return { message: 'User not found' };
     }
-    if (user.Contribution.length > 0) {
-      for (const contribution of user.Contribution) {
+    if (user.contribution.length > 0) {
+      for (const contribution of user.contribution) {
         await this.entityManager.softDelete(Contribution, {
-          ID: contribution.ID,
+          id: contribution.id,
         });
       }
     }
-    await this.usersRepository.softDelete(ID);
+    await this.usersRepository.softDelete(id);
     return { data: null, message: 'User deletion successful' };
   }
 }
