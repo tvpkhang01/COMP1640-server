@@ -12,13 +12,13 @@ import { User } from './user.entity';
 @Entity()
 export class Contribution extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
-  ID: string;
+  id: string;
 
   @Column()
-  Title: string;
+  title: string;
 
   @Column('json')
-  FilePaths: { Value: string }[];
+  filePaths: { value: string }[];
 
   @Column({
     type: 'enum',
@@ -26,7 +26,7 @@ export class Contribution extends AbstractEntity {
     default: StatusEnum.REJECT,
     nullable: false,
   })
-  Status: StatusEnum;
+  status: StatusEnum;
 
   @Column({
     type: 'enum',
@@ -34,14 +34,14 @@ export class Contribution extends AbstractEntity {
     default: TermEnum.DISAGREE,
     nullable: false,
   })
-  Term: TermEnum;
+  term: TermEnum;
 
   // User/Student relationship
   @Column()
   studentId: string;
-  @ManyToOne(() => User, (user) => user.Contribution)
-  @JoinColumn({ name: 'studentId', referencedColumnName: 'ID' })
-  Student: User;
+  @ManyToOne(() => User, (user) => user.contribution)
+  @JoinColumn({ name: 'studentId', referencedColumnName: 'id' })
+  student: User;
 
   constructor(contribution: Partial<Contribution>) {
     super();

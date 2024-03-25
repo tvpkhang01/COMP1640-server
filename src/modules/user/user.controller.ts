@@ -28,23 +28,23 @@ export class UserController {
     return this.userService.getUsers(params);
   }
 
-  @Get(':ID')
-  async findOne(@Param('ID') ID: string) {
-    return this.userService.getUserById(ID);
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.userService.getUserById(id);
   }
 
-  @Patch(':ID')
+  @Patch(':id')
   async update(
-    @Param('ID') ID: string,
+    @Param('id') id: string,
     @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
   ) {
-    const result = await this.userService.update(ID, updateUserDto);
+    const result = await this.userService.update(id, updateUserDto);
     return { result, message: 'Successfully update user' };
   }
 
-  @Delete(':ID')
-  async remove(@Param('ID') ID: string) {
-    const result = await this.userService.remove(ID);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const result = await this.userService.remove(id);
     if (result.message) {
       return { message: result.message };
     } else {

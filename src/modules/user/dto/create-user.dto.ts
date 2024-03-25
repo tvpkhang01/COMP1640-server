@@ -3,26 +3,26 @@ import { GenderEnum, RoleEnum } from 'src/common/enum/enum';
 
 export class CreateUserDto {
   @IsNotEmpty()
-  UserName: string;
+  userName: string;
 
   @IsNotEmpty()
-  Code: string;
+  code: string;
 
   @IsNotEmpty()
-  Email: string;
+  email: string;
 
   @IsNotEmpty()
-  Gender: GenderEnum;
+  gender: GenderEnum;
 
   @IsNotEmpty()
-  Phone: string;
+  phone: string;
 
   @IsNotEmpty()
-  DateOfBirth: Date;
+  dateOfBirth: Date;
 
-  Role: RoleEnum;
+  role: RoleEnum;
 
   facultyId: string;
 
-  Avatar: string;
+  avatar: string;
 }

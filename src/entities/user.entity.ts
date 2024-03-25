@@ -14,31 +14,31 @@ import { Contribution } from './contribution.entity';
 @Entity()
 export class User extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
-  ID: string;
+  id: string;
 
   @Column()
-  UserName: string;
+  userName: string;
 
   @Column()
-  Password: string = '123456789';
+  password: string = '123456789';
 
   @Column()
-  Code: string;
+  code: string;
 
   @Column()
-  Email: string;
+  email: string;
 
   @Column()
-  Phone: string;
+  phone: string;
 
   @Column({ nullable: true })
-  DateOfBirth: Date;
+  dateOfBirth: Date;
 
   @Column({ nullable: true })
-  Avatar: string;
+  avatar: string;
 
   @Column({ type: 'enum', enum: GenderEnum, nullable: false })
-  Gender: GenderEnum;
+  gender: GenderEnum;
 
   @Column({
     type: 'enum',
@@ -46,21 +46,21 @@ export class User extends AbstractEntity {
     default: RoleEnum.STUDENT,
     nullable: false,
   })
-  Role: RoleEnum;
+  role: RoleEnum;
 
   // Faculty relationship
   @Column({ nullable: true })
   facultyId: string;
-  @ManyToOne(() => Faculty, (faculty) => faculty.Student)
-  @JoinColumn({ name: 'facultyId', referencedColumnName: 'ID' })
-  Faculty: Faculty;
+  @ManyToOne(() => Faculty, (faculty) => faculty.student)
+  @JoinColumn({ name: 'facultyId', referencedColumnName: 'id' })
+  faculty: Faculty;
 
   // Contribution relationship
-  @OneToMany(() => Contribution, (contribution) => contribution.Student, {
+  @OneToMany(() => Contribution, (contribution) => contribution.student, {
     cascade: true,
     onUpdate: 'CASCADE',
   })
-  Contribution: Contribution[];
+  contribution: Contribution[];
 
   constructor(user: Partial<User>) {
     super();

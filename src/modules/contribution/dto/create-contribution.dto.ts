@@ -3,11 +3,11 @@ import { StatusEnum, TermEnum } from 'src/common/enum/enum';
 
 export class CreateContributionDto {
   @IsNotEmpty()
-  Title: string;
+  title: string;
 
-  FilePaths: { Value: string }[];
+  filePaths: { value: string }[];
 
-  Status: StatusEnum;
+  status: StatusEnum;
 
-  Term: TermEnum;
+  term: TermEnum;
 }

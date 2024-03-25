@@ -12,23 +12,23 @@ import { User } from './user.entity';
 @Entity()
 export class Faculty extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
-  ID: string;
+  id: string;
 
   @Column()
-  FacultyName: string;
+  facultyName: string;
 
   @Column({ nullable: true, default: null })
   mCoordinatorId: string;
 
-  @OneToMany(() => User, (user) => user.Faculty, {
+  @OneToMany(() => User, (user) => user.faculty, {
     cascade: true,
     onUpdate: 'CASCADE',
   })
-  Student: User[];
+  student: User[];
 
   @OneToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'mCoordinatorId', referencedColumnName: 'ID' })
-  MCoordinator: User;
+  @JoinColumn({ name: 'mCoordinatorId', referencedColumnName: 'id' })
+  mCoordinator: User;
 
   constructor(faculty: Partial<Faculty>) {
     super();
