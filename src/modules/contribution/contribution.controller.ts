@@ -28,26 +28,26 @@ export class ContributionController {
     return this.contributionService.getContributions(params);
   }
 
-  @Get(':ID')
-  async findOne(@Param('ID') ID: string) {
-    return this.contributionService.getContributionById(ID);
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.contributionService.getContributionById(id);
   }
 
-  @Patch(':ID')
+  @Patch(':id')
   async update(
-    @Param('ID') ID: string,
+    @Param('id') id: string,
     @Body(new ValidationPipe()) updatecontributionDto: UpdateContributionDto,
   ) {
     const result = await this.contributionService.update(
-      ID,
+      id,
       updatecontributionDto,
     );
     return { result, message: 'Successfully update contribituon' };
   }
 
-  @Delete(':ID')
-  async remove(@Param('ID') ID: string) {
-    const result = await this.contributionService.remove(ID);
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const result = await this.contributionService.remove(id);
     if (result.message) {
       return { message: result.message };
     } else {

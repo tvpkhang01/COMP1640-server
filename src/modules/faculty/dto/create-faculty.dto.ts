@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreateFacultyDto {
   @IsNotEmpty()
-  FacultyName: string;
+  facultyName: string;
 
-  mCoordinatorID: string;
+  mCoordinatorId: string;
 }

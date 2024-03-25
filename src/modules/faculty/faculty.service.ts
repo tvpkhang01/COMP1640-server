@@ -27,13 +27,13 @@ export class FacultyService {
   async getFaculties(params: GetFacultyParams) {
     const faculties = this.facultiesRepository
       .createQueryBuilder('faculty')
-      .select(['faculty', 'MCoordinator'])
-      .leftJoin('faculty.MCoordinator', 'MCoordinator')
+      .select(['faculty', 'mCoordinator'])
+      .leftJoin('faculty.mCoordinator', 'mCoordinator')
       .skip(params.skip)
       .take(params.take)
       .orderBy('faculty.createdAt', Order.DESC);
     if (params.search) {
-      faculties.andWhere('faculty.name ILIKE :FacultyName', {
+      faculties.andWhere('faculty.facultyName ILIKE :facultyName', {
         name: `%${params.search}%`,
       });
     }
@@ -45,43 +45,43 @@ export class FacultyService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
-  async getFacultyById(ID: string) {
+  async getFacultyById(id: string) {
     const faculty = await this.facultiesRepository
       .createQueryBuilder('faculty')
-      .select(['faculty', 'MCoordinator'])
-      .leftJoin('faculty.MCoordinator', 'MCoordinator')
-      .where('faculty.ID = :ID', { ID })
+      .select(['faculty', 'mCoordinator'])
+      .leftJoin('faculty.mCoordinator', 'mCoordinator')
+      .where('faculty.id = :id', { id })
       .getOne();
     return faculty;
   }
 
-  async update(ID: string, updateUserDto: UpdateFacultyDto) {
-    const faculty = await this.facultiesRepository.findOneBy({ ID });
+  async update(id: string, updateUserDto: UpdateFacultyDto) {
+    const faculty = await this.facultiesRepository.findOneBy({ id });
     if (!faculty) {
       return { message: 'Faculty not found' };
     }
     if (faculty) {
-      faculty.FacultyName = updateUserDto.FacultyName;
+      faculty.facultyName = updateUserDto.facultyName;
       await this.entityManager.save(faculty);
       return { faculty, message: 'Successfully update faculty' };
     }
   }
 
-  async remove(ID: string) {
+  async remove(id: string) {
     const faculty = await this.facultiesRepository
       .createQueryBuilder('faculty')
-      .leftJoinAndSelect('faculty.Student', 'Student')
-      .where('faculty.ID = :ID', { ID })
+      .leftJoinAndSelect('faculty.student', 'student')
+      .where('faculty.id = :id', { id })
       .getOne();
     if (!faculty) {
       return { message: 'Faculty not found' };
     }
-    if (faculty.Student.length > 0) {
-      for (const student of faculty.Student) {
-        await this.entityManager.softDelete(User, { ID: student.ID });
+    if (faculty.student.length > 0) {
+      for (const student of faculty.student) {
+        await this.entityManager.softDelete(User, { id: student.id });
       }
     }
-    await this.facultiesRepository.softDelete(ID);
+    await this.facultiesRepository.softDelete(id);
     return { data: null, message: 'Faculty deletion successful' };
   }
 }
