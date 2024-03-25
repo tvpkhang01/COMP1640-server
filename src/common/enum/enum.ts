@@ -3,6 +3,21 @@ export enum GenderEnum {
   FEMALE = 'female',
 }
 
+export enum TermEnum {
+  AGREE = 'agree',
+  DISAGREE = 'disagree',
+}
+
+export enum StatusEnum {
+  APPROVE = 'approve',
+  REJECT = 'reject',
+}
+
+export enum ContentTypeEnum {
+  IMAGE = 'img',
+  DOCX = 'docx',
+}
+
 export enum RoleEnum {
   ADMIN = 'admin',
   STUDENT = 'student',

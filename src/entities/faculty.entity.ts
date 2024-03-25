@@ -18,17 +18,17 @@ export class Faculty extends AbstractEntity {
   FacultyName: string;
 
   @Column({ nullable: true, default: null })
-  mCoordinatorID: string | null;
+  mCoordinatorId: string;
 
   @OneToMany(() => User, (user) => user.Faculty, {
     cascade: true,
     onUpdate: 'CASCADE',
   })
-  user: User[];
+  Student: User[];
 
   @OneToOne(() => User, { nullable: true })
-  @JoinColumn()
-  MCoordinator: User | null;
+  @JoinColumn({ name: 'mCoordinatorId', referencedColumnName: 'ID' })
+  MCoordinator: User;
 
   constructor(faculty: Partial<Faculty>) {
     super();

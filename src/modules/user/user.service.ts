@@ -8,6 +8,7 @@ import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Contribution } from 'src/entities/contribution.entity';
 
 @Injectable()
 export class UserService {
@@ -32,8 +33,8 @@ export class UserService {
       .take(params.take)
       .orderBy('user.createdAt', Order.DESC);
     if (params.search) {
-      users.andWhere('user.name ILIKE :UserName', {
-        name: `%${params.search}%`,
+      users.andWhere('user.UserName ILIKE :UserName', {
+        UserName: `%${params.search}%`,
       });
     }
     const [result, total] = await users.getManyAndCount();
@@ -56,6 +57,9 @@ export class UserService {
 
   async update(ID: string, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneBy({ ID });
+    if (!user) {
+      return { message: 'User not found' };
+    }
     if (user) {
       user.UserName = updateUserDto.UserName;
       user.Password = updateUserDto.Password;
@@ -71,9 +75,20 @@ export class UserService {
   }
 
   async remove(ID: string) {
-    const user = await this.usersRepository.findOneBy({ ID });
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.Contribution', 'Contribution')
+      .where('user.ID = :ID', { ID })
+      .getOne();
     if (!user) {
       return { message: 'User not found' };
+    }
+    if (user.Contribution.length > 0) {
+      for (const contribution of user.Contribution) {
+        await this.entityManager.softDelete(Contribution, {
+          ID: contribution.ID,
+        });
+      }
     }
     await this.usersRepository.softDelete(ID);
     return { data: null, message: 'User deletion successful' };
