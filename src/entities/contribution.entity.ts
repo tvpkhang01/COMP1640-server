@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { StatusEnum, TermEnum } from 'src/common/enum/enum';
 import { User } from './user.entity';
+import { Magazine } from './magazine.entity';
 
 @Entity()
 export class Contribution extends AbstractEntity {
@@ -42,6 +43,13 @@ export class Contribution extends AbstractEntity {
   @ManyToOne(() => User, (user) => user.contribution)
   @JoinColumn({ name: 'studentId', referencedColumnName: 'id' })
   student: User;
+
+  //relationship contribution with magazine ManyToOne
+  @Column()
+  magazineId: string;
+  @ManyToOne(() => Magazine, (magazine) => magazine.contribution)
+  @JoinColumn({ name: 'magazineId', referencedColumnName: 'id' })
+  magazine: Magazine;
 
   constructor(contribution: Partial<Contribution>) {
     super();

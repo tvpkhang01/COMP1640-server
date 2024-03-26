@@ -6,10 +6,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { UserController } from '../user/user.controller';
 import { UserService } from '../user/user.service';
+import { Magazine } from 'src/entities/magazine.entity';
+import { MagazineController } from '../magazine/magazine.controller';
+import { MagazineService } from '../magazine/magazine.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Contribution, User])],
-  controllers: [ContributionController, UserController],
-  providers: [ContributionService, UserService],
+  imports: [TypeOrmModule.forFeature([Contribution, User, Magazine])],
+  controllers: [ContributionController, UserController, MagazineController],
+  providers: [ContributionService, UserService, MagazineService],
 })
 export class ContributionModule {}

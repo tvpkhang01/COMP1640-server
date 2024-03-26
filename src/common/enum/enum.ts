@@ -16,8 +16,8 @@ export enum StatusEnum {
 export enum RoleEnum {
   ADMIN = 'admin',
   STUDENT = 'student',
-  MM = 'manager marketing',
-  MC = 'manager cordinator',
+  MM = 'marketing manager',
+  MC = 'marketing coordinator',
   GUEST = 'guest',
 }
 
