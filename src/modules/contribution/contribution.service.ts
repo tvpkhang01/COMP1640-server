@@ -6,7 +6,6 @@ import { Contribution } from 'src/entities/contribution.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { Order, StatusEnum } from 'src/common/enum/enum';
-import { Order, StatusEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
