@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Contribution } from 'src/entities/contribution.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
-import { Order } from 'src/common/enum/enum';
+import { Order, StatusEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 
@@ -28,12 +28,25 @@ export class ContributionService {
       .createQueryBuilder('contribution')
       .select(['contribution', 'student'])
       .leftJoin('contribution.student', 'student')
+      .andWhere('contribution.status = ANY(:status)', {
+        status: params.status
+          ? [params.status]
+          : [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
+      })
       .skip(params.skip)
       .take(params.take)
-      .orderBy('contribution.createdAt', Order.DESC);
-    if (params.search) {
+      .orderBy(
+        'contribution.createdAt',
+        params.order === Order.ASC ? Order.ASC : Order.DESC,
+      );
+    if (params.searchByTitle) {
       contributions.andWhere('contribution.title ILIKE :title', {
-        title: `%${params.search}%`,
+        title: `%${params.searchByTitle}%`,
+      });
+    }
+    if (params.searchByUserName) {
+      contributions.andWhere('student.userName ILIKE :userName', {
+        userName: `%${params.searchByUserName}%`,
       });
     }
     const [result, total] = await contributions.getManyAndCount();

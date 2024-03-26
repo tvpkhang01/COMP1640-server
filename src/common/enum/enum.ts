@@ -10,6 +10,7 @@ export enum TermEnum {
 
 export enum StatusEnum {
   APPROVE = 'approve',
+  PENDING = 'pending',
   REJECT = 'reject',
 }
 
