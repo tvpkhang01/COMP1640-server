@@ -23,7 +23,7 @@ export class Contribution extends AbstractEntity {
   @Column({
     type: 'enum',
     enum: StatusEnum,
-    default: StatusEnum.REJECT,
+    default: StatusEnum.PENDING,
     nullable: false,
   })
   status: StatusEnum;

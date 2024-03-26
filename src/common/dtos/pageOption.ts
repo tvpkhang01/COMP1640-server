@@ -7,10 +7,10 @@ export class PageOptionsDto {
   search?: string = '';
 
   @IsString()
-  searchByName?: string = '';
+  searchByTitle?: string = '';
 
   @IsString()
-  searchByEmail?: string = '';
+  searchByUserName?: string = '';
 
   @IsEnum(Order)
   @IsOptional()
