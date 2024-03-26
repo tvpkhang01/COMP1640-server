@@ -26,13 +26,14 @@ export class ContributionService {
   async getContributions(params: GetContributionParams) {
     const contributions = this.contributionsRepository
       .createQueryBuilder('contribution')
-      .select(['contribution', 'student'])
+      .select(['contribution', 'student', 'magazine'])
       .leftJoin('contribution.student', 'student')
       .andWhere('contribution.status = ANY(:status)', {
         status: params.status
           ? [params.status]
           : [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
       })
+      .leftJoin('contribution.magazine', 'magazine')
       .skip(params.skip)
       .take(params.take)
       .orderBy(
