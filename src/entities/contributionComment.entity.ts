@@ -4,7 +4,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class ContributionComment extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
-  ID: string;
+  id: string;
 
   @Column()
   contributionId: string;
