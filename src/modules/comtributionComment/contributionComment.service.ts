@@ -77,4 +77,14 @@ export class ContributionCommentService {
       return { contributionComment, message: 'Successfully update comment' };
     }
   }
+
+  async remove(id: string) {
+    const contributionComment =
+      await this.contributionCommentsRepository.findOneBy({ id });
+    if (!contributionComment) {
+      return { message: 'comment not found' };
+    }
+    await this.contributionCommentsRepository.softDelete(id);
+    return { data: null, message: 'comment deletion successful' };
+  }
 }
