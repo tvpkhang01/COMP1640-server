@@ -7,6 +7,7 @@ import { GetContributionCommentParams } from './dto/getList-contributionComment.
 import { Order } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
+import { UpdateContributionCommentDto } from './dto/update-contributionComment.dto';
 
 @Injectable()
 export class ContributionCommentService {
@@ -56,5 +57,24 @@ export class ContributionCommentService {
       contributionComment,
       message: 'Successfully create contributionComment',
     };
+  }
+  async update(
+    id: string,
+    updateContributionCommentDto: UpdateContributionCommentDto,
+  ) {
+    const contributionComment =
+      await this.contributionCommentsRepository.findOneBy({ id });
+    if (contributionComment) {
+      contributionComment.contributionId =
+        updateContributionCommentDto.contributionId;
+      contributionComment.coordinatorId =
+        updateContributionCommentDto.coordinatorId;
+      contributionComment.comment = updateContributionCommentDto.comment;
+      contributionComment.commentDate =
+        updateContributionCommentDto.commentDate;
+
+      await this.entityManager.save(contributionComment);
+      return { contributionComment, message: 'Successfully update comment' };
+    }
   }
 }
