@@ -7,6 +7,7 @@ import {
   Query,
   Patch,
   ValidationPipe,
+  Delete,
 } from '@nestjs/common';
 import { CreateContributionCommentDto } from './dto/create-contributionComment.dto';
 import { ContributionCommentService } from './contributionComment.service';
@@ -47,5 +48,15 @@ export class ContributionCommentController {
       updateContributionCommentDto,
     );
     return { result, message: 'Successfully update comment' };
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const result = await this.contributionCommentService.remove(id);
+    if (result.message) {
+      return { message: result.message };
+    } else {
+      return;
+    }
   }
 }
