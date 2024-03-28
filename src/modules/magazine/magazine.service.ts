@@ -26,8 +26,8 @@ export class MagazineService {
       .take(params.take)
       .orderBy('magazine.createdAt', Order.DESC);
     if (params.search) {
-      magazines.andWhere('project.name ILIKE :magazineName', {
-        name: `%${params.search}%`,
+      magazines.andWhere('magazine.magazineName ILIKE :magazineName', {
+        magazineName: `%${params.search}%`,
       });
     }
 

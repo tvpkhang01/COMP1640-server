@@ -28,9 +28,9 @@ export class ContributionCommentService {
       .orderBy('contributionComment.createdAt', Order.DESC);
     if (params.search) {
       contributionComments.andWhere(
-        'project.name ILIKE :ContributionCommentName',
+        'contributionComment.comment ILIKE :comment',
         {
-          name: `%${params.search}%`,
+          comment: `%${params.search}%`,
         },
       );
     }
