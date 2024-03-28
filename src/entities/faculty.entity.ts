@@ -18,7 +18,7 @@ export class Faculty extends AbstractEntity {
   facultyName: string;
 
   @Column({ nullable: true, default: null })
-  mCoordinatorId: string;
+  coordinatorId: string;
 
   @OneToMany(() => User, (user) => user.faculty, {
     cascade: true,
@@ -27,8 +27,8 @@ export class Faculty extends AbstractEntity {
   student: User[];
 
   @OneToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'mCoordinatorId', referencedColumnName: 'id' })
-  mCoordinator: User;
+  @JoinColumn({ name: 'coordinatorId', referencedColumnName: 'id' })
+  coordinator: User;
 
   constructor(faculty: Partial<Faculty>) {
     super();

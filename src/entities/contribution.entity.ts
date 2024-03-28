@@ -4,11 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { StatusEnum, TermEnum } from 'src/common/enum/enum';
 import { User } from './user.entity';
 import { Magazine } from './magazine.entity';
+import { ContributionComment } from './contributionComment.entity';
 
 @Entity()
 export class Contribution extends AbstractEntity {
@@ -50,6 +52,17 @@ export class Contribution extends AbstractEntity {
   @ManyToOne(() => Magazine, (magazine) => magazine.contribution)
   @JoinColumn({ name: 'magazineId', referencedColumnName: 'id' })
   magazine: Magazine;
+
+  //contribution with contributionComment
+  @OneToMany(
+    () => ContributionComment,
+    (contributionComment) => contributionComment.contribution,
+    {
+      cascade: true,
+      onUpdate: 'CASCADE',
+    },
+  )
+  contributionComment: ContributionComment[];
 
   constructor(contribution: Partial<Contribution>) {
     super();
