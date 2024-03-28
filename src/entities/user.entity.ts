@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Faculty } from './faculty.entity';
 import { Contribution } from './contribution.entity';
+import { ContributionComment } from './contributionComment.entity';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -61,6 +62,17 @@ export class User extends AbstractEntity {
     onUpdate: 'CASCADE',
   })
   contribution: Contribution[];
+
+  // ContributionComment relationship
+  @OneToMany(
+    () => ContributionComment,
+    (contributionComment) => contributionComment.coordinator,
+    {
+      cascade: true,
+      onUpdate: 'CASCADE',
+    },
+  )
+  contributionComment: ContributionComment[];
 
   constructor(user: Partial<User>) {
     super();

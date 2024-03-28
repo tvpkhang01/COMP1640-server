@@ -8,6 +8,7 @@ import { GetContributionParams } from './dto/getList_contribition.dto';
 import { Order, StatusEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
+import { ContributionComment } from 'src/entities/contributionComment.entity';
 
 @Injectable()
 export class ContributionService {
@@ -83,9 +84,23 @@ export class ContributionService {
   }
 
   async remove(id: string) {
-    const contribution = await this.contributionsRepository.findOneBy({ id });
+    const contribution = await this.contributionsRepository
+      .createQueryBuilder('contribution')
+      .leftJoinAndSelect(
+        'contribution.contributionComment',
+        'contributionComment',
+      )
+      .where('contribution.id = :id', { id })
+      .getOne();
     if (!contribution) {
       return { message: 'Contribution not found' };
+    }
+    if (contribution.contributionComment.length > 0) {
+      for (const contributionComment of contribution.contributionComment) {
+        await this.entityManager.softDelete(ContributionComment, {
+          id: contributionComment.id,
+        });
+      }
     }
     await this.contributionsRepository.softDelete(id);
     return { data: null, message: 'Contribution deletion successful' };

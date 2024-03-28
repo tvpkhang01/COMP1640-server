@@ -20,7 +20,9 @@ export class ContributionCommentService {
   async getContributionComments(params: GetContributionCommentParams) {
     const contributionComments = this.contributionCommentsRepository
       .createQueryBuilder('contributionComment')
-      .select(['contributionComment'])
+      .select(['contributionComment', 'coordinator', 'contribution'])
+      .leftJoin('contributionComment.coordinator', 'coordinator')
+      .leftJoin('contributionComment.contribution', 'contribution')
       .skip(params.skip)
       .take(params.take)
       .orderBy('contributionComment.createdAt', Order.DESC);
