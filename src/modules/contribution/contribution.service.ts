@@ -35,7 +35,6 @@ export class ContributionService {
           ? [params.status]
           : [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
       })
-      .leftJoin('contribution.magazine', 'magazine')
       .skip(params.skip)
       .take(params.take)
       .orderBy(
