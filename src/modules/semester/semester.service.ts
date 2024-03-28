@@ -25,8 +25,8 @@ export class SemesterService {
       .take(params.take)
       .orderBy('semester.createdAt', Order.DESC);
     if (params.search) {
-      semesters.andWhere('project.name ILIKE :SemesterName', {
-        name: `%${params.search}%`,
+      semesters.andWhere('semester.semesterName ILIKE :semesterName', {
+        semesterName: `%${params.search}%`,
       });
     }
 

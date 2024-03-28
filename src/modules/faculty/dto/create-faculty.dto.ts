@@ -4,5 +4,5 @@ export class CreateFacultyDto {
   @IsNotEmpty()
   facultyName: string;
 
-  mCoordinatorId: string;
+  coordinatorId: string;
 }

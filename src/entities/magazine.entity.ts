@@ -4,9 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Semester } from './semester.entity';
+import { Contribution } from './contribution.entity';
 
 @Entity()
 export class Magazine extends AbstractEntity {
@@ -28,6 +30,12 @@ export class Magazine extends AbstractEntity {
   @ManyToOne(() => Semester, (semester) => semester.magazine)
   @JoinColumn({ name: 'semesterId', referencedColumnName: 'id' })
   semester: Semester;
+
+  @OneToMany(() => Contribution, (contribution) => contribution.magazine, {
+    cascade: true,
+    onUpdate: 'CASCADE',
+  })
+  contribution: Contribution[];
 
   constructor(magazine: Partial<Magazine>) {
     super();

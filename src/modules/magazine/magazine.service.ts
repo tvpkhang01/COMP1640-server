@@ -8,6 +8,7 @@ import { Order } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { Magazine } from 'src/entities/magazine.entity';
+import { Contribution } from 'src/entities/contribution.entity';
 
 @Injectable()
 export class MagazineService {
@@ -25,8 +26,8 @@ export class MagazineService {
       .take(params.take)
       .orderBy('magazine.createdAt', Order.DESC);
     if (params.search) {
-      magazines.andWhere('project.name ILIKE :magazineName', {
-        name: `%${params.search}%`,
+      magazines.andWhere('magazine.magazineName ILIKE :magazineName', {
+        magazineName: `%${params.search}%`,
       });
     }
 
@@ -66,14 +67,24 @@ export class MagazineService {
   }
 
   async remove(id: string) {
-    const magazine = await this.magazinesRepository.findOneBy({ id });
+    const magazine = await this.magazinesRepository
+      .createQueryBuilder('magazine')
+      .leftJoinAndSelect('magazine.contribution', 'contribution')
+      .where('magazine.id = :id', { id })
+      .getOne();
     if (!magazine) {
-      return { message: 'magazine not found' };
+      return { message: 'Magazine not found' };
+    }
+    if (magazine.contribution.length > 0) {
+      for (const contribution of magazine.contribution) {
+        await this.entityManager.softDelete(Contribution, {
+          id: contribution.id,
+        });
+      }
     }
     await this.magazinesRepository.softDelete(id);
     return { data: null, message: 'Magazine deletion successful' };
   }
-
   // update(ID: string, updateSemesterDto: UpdateSemesterDto) {
   //   return `This action updates a #${ID} semester`;
   // }

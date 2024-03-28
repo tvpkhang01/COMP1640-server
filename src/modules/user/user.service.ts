@@ -9,6 +9,7 @@ import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Contribution } from 'src/entities/contribution.entity';
+import { ContributionComment } from 'src/entities/contributionComment.entity';
 
 @Injectable()
 export class UserService {
@@ -77,7 +78,11 @@ export class UserService {
   async remove(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.contribution', 'contribution')
+      .leftJoinAndSelect(
+        'user.contribution',
+        'contribution',
+        'contributionComment',
+      )
       .where('user.id = :id', { id })
       .getOne();
     if (!user) {
@@ -87,6 +92,13 @@ export class UserService {
       for (const contribution of user.contribution) {
         await this.entityManager.softDelete(Contribution, {
           id: contribution.id,
+        });
+      }
+    }
+    if (user.contributionComment.length > 0) {
+      for (const contributionComment of user.contributionComment) {
+        await this.entityManager.softDelete(ContributionComment, {
+          id: contributionComment.id,
         });
       }
     }

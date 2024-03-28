@@ -9,10 +9,30 @@ import { FacultyService } from '../faculty/faculty.service';
 import { Contribution } from 'src/entities/contribution.entity';
 import { ContributionController } from '../contribution/contribution.controller';
 import { ContributionService } from '../contribution/contribution.service';
+import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { ContributionCommentController } from '../comtributionComment/contributionComment.controller';
+import { ContributionCommentService } from '../comtributionComment/contributionComment.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Faculty, Contribution])],
-  controllers: [UserController, FacultyController, ContributionController],
-  providers: [UserService, FacultyService, ContributionService],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Faculty,
+      Contribution,
+      ContributionComment,
+    ]),
+  ],
+  controllers: [
+    UserController,
+    FacultyController,
+    ContributionController,
+    ContributionCommentController,
+  ],
+  providers: [
+    UserService,
+    FacultyService,
+    ContributionService,
+    ContributionCommentService,
+  ],
 })
 export class UserModule {}
