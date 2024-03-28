@@ -8,11 +8,15 @@ import {
   Query,
   ValidationPipe,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserParams } from './dto/getList_user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from '../auth/utils/auth.guard';
+import { RolesGuard } from '../auth/utils/role.middleware';
+import { RoleEnum } from 'src/common/enum/enum';
 
 @Controller('user')
 export class UserController {
@@ -24,13 +28,19 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM, RoleEnum.MC]))
   async findAll(@Query() params: GetUserParams) {
     return this.userService.getUsers(params);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOneById(@Param('id') id: string) {
     return this.userService.getUserById(id);
+  }
+
+  @Get(':userName')
+  async findOneByUserName(@Param('id') userName: string) {
+    return this.userService.findOne(userName);
   }
 
   @Patch(':id')
