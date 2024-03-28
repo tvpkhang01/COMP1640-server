@@ -29,6 +29,7 @@ export class ContributionService {
       .createQueryBuilder('contribution')
       .select(['contribution', 'student', 'magazine'])
       .leftJoin('contribution.student', 'student')
+      .leftJoin('contribution.magazine', 'magazine')
       .andWhere('contribution.status = ANY(:status)', {
         status: params.status
           ? [params.status]
