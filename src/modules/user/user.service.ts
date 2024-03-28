@@ -51,7 +51,7 @@ export class UserService {
       .createQueryBuilder('user')
       .select(['user', 'faculty.facultyName'])
       .leftJoin('user.faculty', 'faculty')
-      .where('user.id = :ID', { id })
+      .where('user.id = :id', { id })
       .getOne();
     return user;
   }
