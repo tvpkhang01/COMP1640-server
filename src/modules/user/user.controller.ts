@@ -23,6 +23,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM, RoleEnum.MC]))
   async create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }

@@ -8,13 +8,18 @@ import {
   Delete,
   Query,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { SemesterService } from './semester.service';
 import { CreateSemesterDto } from './dto/create-semester.dto';
 import { UpdateSemesterDto } from './dto/update-semester.dto';
 import { GetSemesterParams } from './dto/getList_semester.dto';
+import { AuthGuard } from '../auth/utils/auth.guard';
+import { RolesGuard } from '../auth/utils/role.middleware';
+import { RoleEnum } from 'src/common/enum/enum';
 
 @Controller('semester')
+@UseGuards(AuthGuard, new RolesGuard([RoleEnum.ADMIN]))
 export class SemesterController {
   constructor(private readonly semesterService: SemesterService) {}
 

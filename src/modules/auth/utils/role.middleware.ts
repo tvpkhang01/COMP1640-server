@@ -9,12 +9,11 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (!user) {
-      return false; 
+    if (!user || !user.role) {
+      return false; // Không xác thực được hoặc không có vai trò
     }
 
-    const hasPermission = this.allowedRoles.some(role => user.role === role);
-    
+    const hasPermission = this.allowedRoles.includes(user.role);
     return hasPermission;
   }
 }
