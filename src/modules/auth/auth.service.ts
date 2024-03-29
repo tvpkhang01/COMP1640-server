@@ -11,9 +11,9 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   constructor(
     @InjectRepository(Auth)
-    private readonly authRepository:Repository<Auth>,
+    private readonly authRepository: Repository<Auth>,
     private readonly userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
   async signIn(userName: string, pass: string): Promise<any> {
     const user = await this.userService.findOne(userName);
@@ -25,22 +25,22 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
-  
+
   async validateUserFromToken(token: string): Promise<Auth> {
     try {
       const decodedToken = this.jwtService.verify(token);
-      
+
       if (!decodedToken || !decodedToken.id) {
         throw new UnauthorizedException('Invalid token');
       }
       const user = await this.authRepository.findOne({
         where: { id: decodedToken.id },
       });
-  
+
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
-  
+
       return user;
     } catch (error) {
       // Xử lý lỗi decode token

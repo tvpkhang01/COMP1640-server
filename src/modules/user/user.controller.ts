@@ -28,7 +28,7 @@ export class UserController {
   }
 
   @Get()
-  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM, RoleEnum.MC]))
+  // @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM, RoleEnum.MC]))
   async findAll(@Query() params: GetUserParams) {
     return this.userService.getUsers(params);
   }
