@@ -8,6 +8,7 @@ import { SemesterModule } from './modules/semester/semester.module';
 import { FacultyModule } from './modules/faculty/faculty.module';
 import { ContributionModule } from './modules/contribution/contribution.module';
 import { MagazineModule } from './modules/magazine/magazine.module';
+import { ContributionCommentModule } from './modules/comtributionComment/contributionComment.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { AuthModule } from './modules/auth/auth.module';
     FacultyModule,
     ContributionModule,
     MagazineModule,
+    ContributionCommentModule,
     AuthModule,
   ],
   controllers: [AppController],

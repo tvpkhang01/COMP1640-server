@@ -27,8 +27,8 @@ export class FacultyService {
   async getFaculties(params: GetFacultyParams) {
     const faculties = this.facultiesRepository
       .createQueryBuilder('faculty')
-      .select(['faculty', 'mCoordinator'])
-      .leftJoin('faculty.mCoordinator', 'mCoordinator')
+      .select(['faculty', 'coordinator'])
+      .leftJoin('faculty.coordinator', 'coordinator')
       .skip(params.skip)
       .take(params.take)
       .orderBy('faculty.createdAt', Order.DESC);
@@ -48,8 +48,8 @@ export class FacultyService {
   async getFacultyById(id: string) {
     const faculty = await this.facultiesRepository
       .createQueryBuilder('faculty')
-      .select(['faculty', 'mCoordinator'])
-      .leftJoin('faculty.mCoordinator', 'mCoordinator')
+      .select(['faculty', 'coordinator'])
+      .leftJoin('faculty.coordinator', 'coordinator')
       .where('faculty.id = :id', { id })
       .getOne();
     return faculty;
@@ -62,7 +62,7 @@ export class FacultyService {
     }
     if (faculty) {
       faculty.facultyName = updateUserDto.facultyName;
-      faculty.mCoordinatorId = updateUserDto.mCoordinatorId;
+      faculty.coordinatorId = updateUserDto.coordinatorId;
       await this.entityManager.save(faculty);
       return { faculty, message: 'Successfully update faculty' };
     }
