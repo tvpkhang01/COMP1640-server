@@ -9,6 +9,7 @@ import { FacultyModule } from './modules/faculty/faculty.module';
 import { ContributionModule } from './modules/contribution/contribution.module';
 import { MagazineModule } from './modules/magazine/magazine.module';
 import { ContributionCommentModule } from './modules/comtributionComment/contributionComment.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ContributionCommentModule } from './modules/comtributionComment/contrib
     ContributionModule,
     MagazineModule,
     ContributionCommentModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
