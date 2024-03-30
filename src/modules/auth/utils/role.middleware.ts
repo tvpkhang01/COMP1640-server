@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { RoleEnum } from '../../../common/enum/enum'; 
+import { RoleEnum } from '../../../common/enum/enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -10,11 +10,11 @@ export class RolesGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
-      return false; 
+      return false;
     }
 
-    const hasPermission = this.allowedRoles.some(role => user.role === role);
-    
+    const hasPermission = this.allowedRoles.some((role) => user.role === role);
+
     return hasPermission;
   }
 }

@@ -8,15 +8,15 @@ import {
   Query,
   ValidationPipe,
   Patch,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserParams } from './dto/getList_user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from '../auth/utils/auth.guard';
-import { RolesGuard } from '../auth/utils/role.middleware';
-import { RoleEnum } from 'src/common/enum/enum';
+// import { AuthGuard } from '../auth/utils/auth.guard';
+// import { RolesGuard } from '../auth/utils/role.middleware';
+// import { RoleEnum } from 'src/common/enum/enum';
 
 @Controller('user')
 export class UserController {
