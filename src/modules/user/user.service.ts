@@ -58,12 +58,12 @@ export class UserService {
 
   async findOne(userName: string): Promise<User | undefined> {
     const user = await this.usersRepository
-    .createQueryBuilder('user')
-    .select(['user', 'faculty.facultyName'])
-    .leftJoin('user.faculty', 'faculty')
-    .where('user.userName = :userName', { userName })
-    .getOne();
-  return user;
+      .createQueryBuilder('user')
+      .select(['user', 'faculty.facultyName'])
+      .leftJoin('user.faculty', 'faculty')
+      .where('user.userName = :userName', { userName })
+      .getOne();
+    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -88,11 +88,8 @@ export class UserService {
   async remove(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect(
-        'user.contribution',
-        'contribution',
-        'contributionComment',
-      )
+      .leftJoinAndSelect('user.contribution', 'contribution')
+      .leftJoinAndSelect('user.contributionComment', 'contributionComment')
       .where('user.id = :id', { id })
       .getOne();
     if (!user) {
