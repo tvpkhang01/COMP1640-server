@@ -8,23 +8,31 @@ import {
   Query,
   ValidationPipe,
   Patch,
+  UseInterceptors,
+  UploadedFile,
   // UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserParams } from './dto/getList_user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 // import { AuthGuard } from '../auth/utils/auth.guard';
 // import { RolesGuard } from '../auth/utils/role.middleware';
 // import { RoleEnum } from 'src/common/enum/enum';
+import { Multer } from 'multer';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() avatar?: Multer.File,
+  ) {
+    return this.userService.create(createUserDto, avatar);
   }
 
   @Get()
@@ -44,11 +52,13 @@ export class UserController {
   }
 
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('avatar'))
   async update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+    @UploadedFile() avatar?: Multer.File,
   ) {
-    const result = await this.userService.update(id, updateUserDto);
+    const result = await this.userService.update(id, updateUserDto, avatar);
     return { result, message: 'Successfully update user' };
   }
 

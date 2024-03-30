@@ -10,6 +10,7 @@ import { ContributionModule } from './modules/contribution/contribution.module';
 import { MagazineModule } from './modules/magazine/magazine.module';
 import { ContributionCommentModule } from './modules/comtributionComment/contributionComment.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from './modules/auth/auth.module';
     MagazineModule,
     ContributionCommentModule,
     AuthModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

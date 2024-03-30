@@ -12,6 +12,7 @@ import { MagazineService } from '../magazine/magazine.service';
 import { ContributionCommentController } from '../comtributionComment/contributionComment.controller';
 import { ContributionCommentService } from '../comtributionComment/contributionComment.service';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ContributionComment } from 'src/entities/contributionComment.entity';
     UserService,
     MagazineService,
     ContributionCommentService,
+    CloudinaryService,
   ],
 })
 export class ContributionModule {}

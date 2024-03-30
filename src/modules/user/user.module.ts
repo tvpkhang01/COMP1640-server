@@ -12,6 +12,7 @@ import { ContributionService } from '../contribution/contribution.service';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
 import { ContributionCommentController } from '../comtributionComment/contributionComment.controller';
 import { ContributionCommentService } from '../comtributionComment/contributionComment.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ContributionCommentService } from '../comtributionComment/contributionC
     FacultyService,
     ContributionService,
     ContributionCommentService,
+    CloudinaryService,
   ],
 })
 export class UserModule {}
