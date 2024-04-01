@@ -18,7 +18,7 @@ export class CloudinaryService {
     });
   }
 
-  async uploadFile(
+  async uploadImageFile(
     file: Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     return new Promise((resolve, reject) => {
@@ -31,6 +31,29 @@ export class CloudinaryService {
     });
   }
 
+  async uploadDocxFile(
+    file: Multer.File,
+  ): Promise<UploadApiResponse | UploadApiErrorResponse> {
+    return new Promise((resolve, reject) => {
+      const upload = v2.uploader.upload_stream(
+        { resource_type: 'auto', format: 'docx' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+
+      if (
+        file.mimetype ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ) {
+        bufferToStream(file.buffer).pipe(upload);
+      } else {
+        reject(new Error('File type not supported. Only accept docx files.'));
+      }
+    });
+  }
+
   async deleteFile(publicId: string): Promise<any> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.destroy(publicId, (error, result) => {
@@ -38,6 +61,18 @@ export class CloudinaryService {
         resolve(result);
       });
     });
+  }
+
+  async deleteDocxFile(publicId: string): Promise<any> {
+    try {
+      const result = await cloudinary.api.delete_resources([publicId], {
+        type: 'upload',
+        resource_type: 'raw',
+      });
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getFileUrl(publicId: string) {
@@ -56,71 +91,10 @@ export class CloudinaryService {
     const publicId = lastPart.split('.').slice(0, -1).join('.');
     return publicId;
   }
+
+  extractPublicIdFromDocxUrl(fileUrl: string): string {
+    const parts = fileUrl.split('/');
+    const lastPart = parts[parts.length - 1];
+    return lastPart;
+  }
 }
-
-// async deleteOldImages(setting: Setting): Promise<void> {
-//     const oldImages: string[] = [];
-//     setting.bannerTop.forEach(banner => oldImages.push(banner.bannerTopImg));
-//     setting.bannerBot.forEach(banner => oldImages.push(banner.bannerBotImg));
-//     setting.slide.forEach(slide => oldImages.push(slide.slideImg));
-//     await Promise.all(oldImages.map(async imageUrl => {
-//       const publicId = this.cloudinaryService.extractPublicIdFromUrl(imageUrl);
-//       await this.cloudinaryService.deleteImage(publicId);
-//     }));
-//   }
-
-//   private async uploadAndReturnUrl(file: Multer.File): Promise<string> {
-//     try {
-//       const result = await this.cloudinaryService.uploadImage(file);
-//       return result.secure_url;
-//     } catch (error) {
-//       console.error('Error uploading image to Cloudinary:', error);
-//       throw error;
-//     }
-//   }
-// async update(
-//     updatedSetting: Partial<Setting>,
-//     oldRatioPrice: number,
-//     oldWarrantyFees: { [key: string]: number },
-//     bannerTopImages: Multer.File[],
-//     bannerBotImages: Multer.File[],
-//     slideImages: Multer.File[]
-//   ): Promise<Setting> {
-//     const existingSetting = await this.settingRepository.findOne({ where: {} });
-//     await this.deleteOldImages(existingSetting);
-//     const mergedSetting = this.settingRepository.merge(existingSetting, updatedSetting);
-//     const updatedSettingEntity = await this.settingRepository.save(mergedSetting);
-
-//     if (JSON.stringify(updatedSettingEntity.warrantyFees) != JSON.stringify(oldWarrantyFees)) {
-//       await this.ebayService.updateWarrantyFees(updatedSettingEntity.warrantyFees, oldWarrantyFees);
-//     }
-
-//     if (Number(updatedSettingEntity.ratioPrice) !== Number(oldRatioPrice)) {
-//       await this.ebayService.updatePricesAccordingToRatio(updatedSettingEntity.ratioPrice, oldRatioPrice);
-//     }
-
-//     const bannerTopUrls = await Promise.all(bannerTopImages.map(async bannerTopImage => this.uploadAndReturnUrl(bannerTopImage)));
-//     const bannerBotUrls = await Promise.all(bannerBotImages.map(async bannerBotImage => this.uploadAndReturnUrl(bannerBotImage)));
-//     const slideUrls = await Promise.all(slideImages.map(async slideImage => this.uploadAndReturnUrl(slideImage)));
-
-//     updatedSettingEntity.bannerTop = bannerTopUrls.map(url => ({ bannerTopImg: url }));
-//     updatedSettingEntity.bannerBot = bannerBotUrls.map(url => ({ bannerBotImg: url }));
-//     updatedSettingEntity.slide = slideUrls.map(url => ({ slideImg: url }));
-
-//     const updatedSettingResult = await this.settingRepository.save(updatedSettingEntity);
-//     return updatedSettingResult;
-//   }
-// async create(settingData: Partial<Setting>, bannerTopImages: Multer.File[], slideImages: Multer.File[], bannerBotImages: Multer.File[]): Promise<Setting> {
-//     const bannerTopUrls = await Promise.all(bannerTopImages.map(async bannerTopImage => this.uploadAndReturnUrl(bannerTopImage)));
-//     const bannerBotUrls = await Promise.all(bannerBotImages.map(async bannerBotImage => this.uploadAndReturnUrl(bannerBotImage)));
-//     const slideUrls = await Promise.all(slideImages.map(async slideImage => this.uploadAndReturnUrl(slideImage)));
-
-//     const setting: Partial<Setting> = {
-//       ...settingData,
-//       bannerTop: bannerTopUrls.map(url => ({ bannerTopImg: url })),
-//       bannerBot: bannerBotUrls.map(url => ({ bannerBotImg: url })),
-//       slide: slideUrls.map(url => ({ slideImg: url })),
-//     };
-
-//     return this.settingRepository.save(setting);
-//   }

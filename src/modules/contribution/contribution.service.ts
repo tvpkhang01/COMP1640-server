@@ -9,6 +9,8 @@ import { Order, StatusEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { Multer } from 'multer';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class ContributionService {
@@ -16,12 +18,60 @@ export class ContributionService {
     @InjectRepository(Contribution)
     private readonly contributionsRepository: Repository<Contribution>,
     private readonly entityManager: EntityManager,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createContributionDto: CreateContributionDto) {
+  async create(
+    createContributionDto: CreateContributionDto,
+    fileImages: Multer.File[],
+    fileDocxs: Multer.File[],
+  ) {
     const contribution = new Contribution(createContributionDto);
+
+    if (fileImages && fileImages.length > 0) {
+      const imageUrls = await Promise.all(
+        fileImages.map(async (file) => {
+          const imageUrl = await this.uploadAndReturnImageUrl(file);
+          return { file: imageUrl };
+        }),
+      );
+
+      contribution.fileImage = imageUrls;
+    }
+
+    if (fileDocxs && fileDocxs.length > 0) {
+      const docxUrls = await Promise.all(
+        fileDocxs.map(async (file) => {
+          const docxUrl = await this.uploadAndReturnDocxUrl(file);
+          return { file: docxUrl };
+        }),
+      );
+
+      contribution.fileDocx = docxUrls;
+    }
+
     await this.entityManager.save(contribution);
     return { contribution, message: 'Successfully create contribution' };
+  }
+
+  private async uploadAndReturnImageUrl(file: Multer.File): Promise<string> {
+    try {
+      const result = await this.cloudinaryService.uploadImageFile(file);
+      return result.secure_url;
+    } catch (error) {
+      console.error('Error uploading image to Cloudinary:', error);
+      throw error;
+    }
+  }
+
+  private async uploadAndReturnDocxUrl(file: Multer.File): Promise<string> {
+    try {
+      const result = await this.cloudinaryService.uploadDocxFile(file);
+      return result.secure_url;
+    } catch (error) {
+      console.error('Error uploading docx to Cloudinary:', error);
+      throw error;
+    }
   }
 
   async getContributions(params: GetContributionParams) {
@@ -69,17 +119,47 @@ export class ContributionService {
     return contribution;
   }
 
-  async update(id: string, updateContributionDto: UpdateContributionDto) {
+  async update(
+    id: string,
+    updateContributionDto: UpdateContributionDto,
+    fileImages: Multer.File[],
+    fileDocxs: Multer.File[],
+  ) {
     const contribution = await this.contributionsRepository.findOneBy({ id });
-    if (!contribution) {
-      return { message: 'Contribution not found' };
-    }
-    if (contribution) {
+    try {
+      if (!contribution) {
+        return { message: 'Contribution not found' };
+      }
+
+      if (fileImages && fileImages.length > 0) {
+        await this.deleteOldImageFiles(contribution);
+        const imageUrls = await Promise.all(
+          fileImages.map(async (file) => {
+            const imageUrl = await this.uploadAndReturnImageUrl(file);
+            return { file: imageUrl };
+          }),
+        );
+
+        contribution.fileImage = imageUrls;
+      }
+
+      if (fileDocxs && fileDocxs.length > 0) {
+        await this.deleteOldDocxFiles(contribution);
+        const docxUrls = await Promise.all(
+          fileDocxs.map(async (file) => {
+            const docxUrl = await this.uploadAndReturnDocxUrl(file);
+            return { file: docxUrl };
+          }),
+        );
+
+        contribution.fileDocx = docxUrls;
+      }
+
       contribution.title = updateContributionDto.title;
-      contribution.filePaths = updateContributionDto.filePaths;
       contribution.status = updateContributionDto.status;
       await this.entityManager.save(contribution);
-      return { contribution, message: 'Successfully update contribution' };
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -104,5 +184,27 @@ export class ContributionService {
     }
     await this.contributionsRepository.softDelete(id);
     return { data: null, message: 'Contribution deletion successful' };
+  }
+
+  async deleteOldImageFiles(contribution: Contribution): Promise<void> {
+    if (contribution.fileImage && contribution.fileImage.length > 0) {
+      for (const fileImages of contribution.fileImage) {
+        const publicId = this.cloudinaryService.extractPublicIdFromUrl(
+          fileImages.file,
+        );
+        await this.cloudinaryService.deleteFile(publicId);
+      }
+    }
+  }
+
+  async deleteOldDocxFiles(contribution: Contribution): Promise<void> {
+    if (contribution.fileDocx && contribution.fileDocx.length > 0) {
+      for (const fileDocxs of contribution.fileDocx) {
+        const publicId = this.cloudinaryService.extractPublicIdFromDocxUrl(
+          fileDocxs.file,
+        );
+        await this.cloudinaryService.deleteDocxFile(publicId);
+      }
+    }
   }
 }

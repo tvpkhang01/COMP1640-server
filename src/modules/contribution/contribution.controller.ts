@@ -8,19 +8,39 @@ import {
   Delete,
   Query,
   ValidationPipe,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { GetContributionParams } from './dto/getList_contribition.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { Multer } from 'multer';
 
 @Controller('contribution')
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) {}
 
   @Post()
-  async create(@Body() createContributionDto: CreateContributionDto) {
-    return this.contributionService.create(createContributionDto);
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'fileImage', maxCount: 5 },
+      { name: 'fileDocx', maxCount: 5 },
+    ]),
+  )
+  async create(
+    @Body() createContributionDto: CreateContributionDto,
+    @UploadedFiles()
+    files: { fileImage?: Multer.File[]; fileDocx?: Multer.File[] },
+  ) {
+    const fileImages = files.fileImage;
+    const fileDocxs = files.fileDocx;
+    return this.contributionService.create(
+      createContributionDto,
+      fileImages,
+      fileDocxs,
+    );
   }
 
   @Get()
@@ -34,13 +54,25 @@ export class ContributionController {
   }
 
   @Patch(':id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'fileImage', maxCount: 5 },
+      { name: 'fileDocx', maxCount: 5 },
+    ]),
+  )
   async update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updatecontributionDto: UpdateContributionDto,
+    @UploadedFiles()
+    files: { fileImage?: Multer.File[]; fileDocx?: Multer.File[] },
   ) {
+    const fileImages = files.fileImage;
+    const fileDocxs = files.fileDocx;
     const result = await this.contributionService.update(
       id,
       updatecontributionDto,
+      fileImages,
+      fileDocxs,
     );
     return { result, message: 'Successfully update contribituon' };
   }

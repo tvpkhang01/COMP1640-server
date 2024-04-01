@@ -122,7 +122,6 @@ export class UserService {
       }
     }
     await this.usersRepository.softDelete(id);
-    await this.deleteOldAvatar(user);
     return { data: null, message: 'User deletion successful' };
   }
 
@@ -137,7 +136,7 @@ export class UserService {
 
   private async uploadAndReturnUrl(file: Multer.File): Promise<string> {
     try {
-      const result = await this.cloudinaryService.uploadFile(file);
+      const result = await this.cloudinaryService.uploadImageFile(file);
       return result.secure_url;
     } catch (error) {
       console.error('Error uploading image to Cloudinary:', error);

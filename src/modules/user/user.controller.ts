@@ -58,7 +58,7 @@ export class UserController {
     @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
     @UploadedFile() avatar?: Multer.File,
   ) {
-    const result = await this.userService.update(id, updateUserDto, avatar);
+    const result = await this.userService.update(id, avatar, updateUserDto);
     return { result, message: 'Successfully update user' };
   }
 
