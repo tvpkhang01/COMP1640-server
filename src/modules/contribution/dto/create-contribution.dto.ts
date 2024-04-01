@@ -5,7 +5,9 @@ export class CreateContributionDto {
   @IsNotEmpty()
   title: string;
 
-  filePaths: { value: string }[];
+  fileImage: { file: string }[];
+
+  fileDocx: { file: string }[];
 
   status: StatusEnum;
 

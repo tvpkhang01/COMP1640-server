@@ -22,6 +22,11 @@ export enum RoleEnum {
   GUEST = 'guest',
 }
 
+export enum TypeFileEnum {
+  IMAGE = 'img',
+  DOCX = 'docx',
+}
+
 export enum Order {
   ASC = 'ASC',
   DESC = 'DESC',

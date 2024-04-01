@@ -21,7 +21,10 @@ export class Contribution extends AbstractEntity {
   title: string;
 
   @Column('json')
-  filePaths: { value: string }[];
+  fileImage: { file: string }[];
+
+  @Column('json')
+  fileDocx: { file: string }[];
 
   @Column({
     type: 'enum',

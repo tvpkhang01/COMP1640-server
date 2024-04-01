@@ -21,7 +21,7 @@ export class FacultyService {
   async create(createFacultyDto: CreateFacultyDto) {
     const faculty = new Faculty(createFacultyDto);
     await this.entityManager.save(faculty);
-    return { faculty, message: 'Successfully create user' };
+    return { faculty, message: 'Successfully create faculty' };
   }
 
   async getFaculties(params: GetFacultyParams) {

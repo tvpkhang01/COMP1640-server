@@ -8,6 +8,7 @@ import { User } from 'src/entities/user.entity';
 import { UserController } from '../user/user.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './utils/constants';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { jwtConstants } from './utils/constants';
     }),
   ],
   controllers: [AuthController, UserController],
-  providers: [AuthService, UserService],
+  providers: [AuthService, UserService, CloudinaryService],
 })
 export class AuthModule {}
