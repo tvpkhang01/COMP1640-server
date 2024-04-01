@@ -24,8 +24,11 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto, avatar?: Multer.File) {
     const user = new User(createUserDto);
-    const avatarUrl = await this.uploadAndReturnUrl(avatar);
-    user.avatar = avatarUrl;
+
+    if (avatar) {
+      const avatarUrl = await this.uploadAndReturnUrl(avatar);
+      user.avatar = avatarUrl;
+    }
     await this.entityManager.save(user);
     return { user, message: 'Successfully create user' };
   }
