@@ -36,7 +36,8 @@ export class User extends AbstractEntity {
   dateOfBirth: Date;
 
   @Column({ nullable: true })
-  avatar: string;
+  avatar: string =
+    'https://res.cloudinary.com/dnjkwuc7p/image/upload/v1712043752/avatar/default_avatar.png';
 
   @Column({ type: 'enum', enum: GenderEnum, nullable: false })
   gender: GenderEnum;
