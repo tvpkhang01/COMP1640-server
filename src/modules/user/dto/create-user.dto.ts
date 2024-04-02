@@ -23,6 +23,4 @@ export class CreateUserDto {
   role: RoleEnum;
 
   facultyId: string;
-
-  avatar: string;
 }

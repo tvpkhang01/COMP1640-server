@@ -36,7 +36,7 @@ export class UserService {
   async getUsers(params: GetUserParams) {
     const users = this.usersRepository
       .createQueryBuilder('user')
-      .select(['user', 'faculty.facultyName'])
+      .select(['user', 'faculty'])
       .leftJoin('user.faculty', 'faculty')
       .skip(params.skip)
       .take(params.take)
@@ -57,7 +57,7 @@ export class UserService {
   async getUserById(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .select(['user', 'faculty.facultyName'])
+      .select(['user', 'faculty'])
       .leftJoin('user.faculty', 'faculty')
       .where('user.id = :id', { id })
       .getOne();
@@ -80,12 +80,11 @@ export class UserService {
       if (!user) {
         return { message: 'User not found' };
       }
-
+      console.log('ava', avatar);
       if (avatar) {
         await this.deleteOldAvatar(user);
         user.avatar = await this.uploadAndReturnUrl(avatar);
       }
-
       user.userName = updateUserDto.userName;
       user.password = updateUserDto.password;
       user.email = updateUserDto.email;
