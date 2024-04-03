@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +11,10 @@ import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
 import { Multer } from 'multer';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import * as JSZip from 'jszip';
+import * as fs from 'fs';
+import * as path from 'path';
+import axios from 'axios';
 
 @Injectable()
 export class ContributionService {
@@ -19,7 +23,7 @@ export class ContributionService {
     private readonly contributionsRepository: Repository<Contribution>,
     private readonly entityManager: EntityManager,
     private readonly cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   async create(
     createContributionDto: CreateContributionDto,
@@ -27,6 +31,9 @@ export class ContributionService {
     fileDocxs: Multer.File[],
   ) {
     const contribution = new Contribution(createContributionDto);
+
+    const fileTitleUrl = await this.createAndUploadTitleFile(contribution.title);
+    contribution.fileTitle = [{ file: fileTitleUrl }];
 
     if (fileImages && fileImages.length > 0) {
       const imageUrls = await Promise.all(
@@ -154,6 +161,11 @@ export class ContributionService {
 
         contribution.fileDocx = docxUrls;
       }
+      if (updateContributionDto.title !== contribution.title) {
+        const fileTitleUrl = await this.createAndUploadTitleFile(updateContributionDto.title);
+        const fileTitleObject = { file: fileTitleUrl };
+        contribution.fileTitle = [fileTitleObject];
+      }
 
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
@@ -205,6 +217,127 @@ export class ContributionService {
         );
         await this.cloudinaryService.deleteDocxFile(publicId);
       }
+    }
+  }
+
+  private async createAndUploadTitleFile(title: string): Promise<string> {
+    const extension = '.txt';
+
+    if (extension === '.txt') {
+      const fileName = 'Title_contribution.txt';
+      const filePath = path.join(__dirname, '../../../', 'titles', fileName);
+      fs.writeFileSync(filePath, title);
+
+      try {
+        const result = await this.cloudinaryService.uploadTitleFile(filePath);
+        fs.unlinkSync(filePath);
+
+        return result.secure_url;
+      } catch (error) {
+        console.error('Error uploading title file to Cloudinary:', error);
+        throw error;
+      }
+    } else {
+      throw new Error('File type not supported. Only accept txt files.');
+    }
+  }
+
+  async downloadContributionFilesAsZip(contributionId: string): Promise<string> {
+    const contribution = await this.getContributionById(contributionId);
+    if (!contribution) {
+      throw new Error('Contribution not found');
+    }
+
+    const zip = new JSZip();
+    const imageFolder = zip.folder('images');
+    const docxFolder = zip.folder('docx');
+    const titleFolder = zip.folder('title');
+
+    for (const image of contribution.fileImage) {
+      const imageUrl = image.file;
+      const imageName = path.basename(imageUrl);
+      const imageData = await this.downloadFile(imageUrl);
+      imageFolder.file(imageName, imageData);
+    }
+
+    for (const docx of contribution.fileDocx) {
+      const docxUrl = docx.file;
+      const docxName = path.basename(docxUrl);
+      const docxData = await this.downloadFile(docxUrl);
+      docxFolder.file(docxName, docxData);
+    }
+
+    for (const title of contribution.fileTitle) {
+      const titleUrl = title.file;
+      const titleName = path.basename(titleUrl);
+      const titleData = await this.downloadFile(titleUrl);
+      titleFolder.file(titleName, titleData);
+    }
+
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+    const zipFileName = `contribution_${contributionId}.zip`;
+    const zipFilePath = path.join(__dirname, '../../../', 'downloads', zipFileName);
+
+    fs.writeFileSync(zipFilePath, zipBuffer);
+
+    return zipFilePath;
+  }
+
+  async downloadMultipleContributionsAsZip(contributionIds: string[]): Promise<string> {
+    const zip = new JSZip();
+
+    for (const id of contributionIds) {
+      const contribution = await this.getContributionById(id);
+      if (!contribution) {
+        throw new Error(`Contribution with ID ${id} not found`);
+      }
+
+      const contributionFolder = zip.folder(`contribution_${id}`);
+      const imageFolder = contributionFolder.folder('images');
+      const docxFolder = contributionFolder.folder('docx');
+      const titleFolder = contributionFolder.folder('title');
+
+      for (const image of contribution.fileImage) {
+        const imageUrl = image.file;
+        const imageName = path.basename(imageUrl);
+        const imageData = await this.downloadFile(imageUrl);
+        imageFolder.file(imageName, imageData);
+      }
+
+      for (const docx of contribution.fileDocx) {
+        const docxUrl = docx.file;
+        const docxName = path.basename(docxUrl);
+        const docxData = await this.downloadFile(docxUrl);
+        docxFolder.file(docxName, docxData);
+      }
+      for (const title of contribution.fileTitle) {
+        const titleUrl = title.file;
+        const titleName = path.basename(titleUrl);
+        const titleData = await this.downloadFile(titleUrl);
+        titleFolder.file(titleName, titleData);
+      }
+    }
+
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+    const zipFileName = `contributions_${contributionIds.join('_')}.zip`;
+    const zipFilePath = path.join(__dirname, '../../../', 'downloads', zipFileName);
+    fs.writeFileSync(zipFilePath, zipBuffer);
+
+    return zipFilePath;
+  }
+
+
+  async downloadFile(url: string): Promise<Buffer> {
+    try {
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer'
+      });
+
+      return Buffer.from(response.data, 'binary');
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      throw new Error('Error downloading file');
     }
   }
 }
