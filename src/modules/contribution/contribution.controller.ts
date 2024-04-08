@@ -46,6 +46,17 @@ export class ContributionController {
     );
   }
 
+  @Get('download-all')
+  async downloadAllContributionsAsZip(@Res() res: Response) {
+    try {
+      const zipFilePath = await this.contributionService.downloadAllContributionsAsZip();
+      res.download(zipFilePath);
+      console.log('đasadsa',zipFilePath)
+    } catch (error) {
+      res.status(500).send({ message: 'Failed to download all contributions' });
+    }
+  }
+
   @Get()
   async findAll(@Query() params: GetContributionParams) {
     return this.contributionService.getContributions(params);
@@ -115,4 +126,5 @@ export class ContributionController {
       res.status(500).send(error.message);
     }
   }
+
 }

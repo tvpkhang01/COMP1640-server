@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Contribution } from 'src/entities/contribution.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
-import { Order, StatusEnum } from 'src/common/enum/enum';
+import { Order, StatusEnum, TermEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
@@ -243,68 +243,55 @@ export class ContributionService {
   }
 
   async downloadContributionFilesAsZip(contributionId: string): Promise<string> {
-    const contribution = await this.getContributionById(contributionId);
-    if (!contribution) {
-      throw new Error('Contribution not found');
-    }
-
-    const zip = new JSZip();
-    const imageFolder = zip.folder('images');
-    const docxFolder = zip.folder('docx');
-    const titleFolder = zip.folder('title');
-
-    for (const image of contribution.fileImage) {
-      const imageUrl = image.file;
-      const imageName = path.basename(imageUrl);
-      const imageData = await this.downloadFile(imageUrl);
-      imageFolder.file(imageName, imageData);
-    }
-
-    for (const docx of contribution.fileDocx) {
-      const docxUrl = docx.file;
-      const docxName = path.basename(docxUrl);
-      const docxData = await this.downloadFile(docxUrl);
-      docxFolder.file(docxName, docxData);
-    }
-
-    for (const title of contribution.fileTitle) {
-      const titleUrl = title.file;
-      const titleName = path.basename(titleUrl);
-      const titleData = await this.downloadFile(titleUrl);
-      titleFolder.file(titleName, titleData);
-    }
-
-    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-
+    const zip = await this.createZipForContribution([contributionId]);
     const zipFileName = `contribution_${contributionId}.zip`;
-    const zipFilePath = path.join(__dirname, '../../../', 'downloads', zipFileName);
-
-    fs.writeFileSync(zipFilePath, zipBuffer);
-
-    return zipFilePath;
+    return this.saveZipToFile(zip, zipFileName);
   }
 
   async downloadMultipleContributionsAsZip(contributionIds: string[]): Promise<string> {
-    const zip = new JSZip();
+    const zip = await this.createZipForContribution(contributionIds);
+    const zipFileName = `contributions_${contributionIds.join('_')}.zip`;
+    return this.saveZipToFile(zip, zipFileName);
+  }
 
+  async downloadAllContributionsAsZip(): Promise<string> {
+    const contributionsResponse = await this.getContributions({
+      status: [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
+      skip: 0,
+      take: 9999,
+      order: Order.ASC,
+      searchByTitle: '',
+      searchByUserName: '',
+      title: '', 
+      filePaths: [],
+      term: TermEnum.AGREE,
+    });
+    if (!contributionsResponse.data || contributionsResponse.data.length === 0) {
+      throw new Error('No contributions found');
+    }
+    const contributionIds = contributionsResponse.data.map(contribution => contribution.id);
+    const zip = await this.createZipForContribution(contributionIds);
+    const zipFileName = `all_contributions.zip`;
+    return this.saveZipToFile(zip, zipFileName);
+  }
+
+  private async createZipForContribution(contributionIds: string[]): Promise<JSZip> {
+    const zip = new JSZip();
     for (const id of contributionIds) {
       const contribution = await this.getContributionById(id);
       if (!contribution) {
         throw new Error(`Contribution with ID ${id} not found`);
       }
-
       const contributionFolder = zip.folder(`contribution_${id}`);
       const imageFolder = contributionFolder.folder('images');
       const docxFolder = contributionFolder.folder('docx');
       const titleFolder = contributionFolder.folder('title');
-
       for (const image of contribution.fileImage) {
         const imageUrl = image.file;
         const imageName = path.basename(imageUrl);
         const imageData = await this.downloadFile(imageUrl);
         imageFolder.file(imageName, imageData);
       }
-
       for (const docx of contribution.fileDocx) {
         const docxUrl = docx.file;
         const docxName = path.basename(docxUrl);
@@ -318,15 +305,15 @@ export class ContributionService {
         titleFolder.file(titleName, titleData);
       }
     }
-
-    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-    const zipFileName = `contributions_${contributionIds.join('_')}.zip`;
-    const zipFilePath = path.join(__dirname, '../../../', 'downloads', zipFileName);
-    fs.writeFileSync(zipFilePath, zipBuffer);
-
-    return zipFilePath;
+    return zip;
   }
 
+  private async saveZipToFile(zip: JSZip, fileName: string): Promise<string> {
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+    const zipFilePath = path.join(__dirname, '../../../', 'downloads', fileName);
+    fs.writeFileSync(zipFilePath, zipBuffer);
+    return zipFilePath;
+  }
 
   async downloadFile(url: string): Promise<Buffer> {
     try {
