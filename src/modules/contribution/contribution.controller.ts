@@ -10,6 +10,8 @@ import {
   ValidationPipe,
   UseInterceptors,
   UploadedFiles,
+  Res,
+  NotFoundException,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
@@ -17,6 +19,7 @@ import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Multer } from 'multer';
+import { Response } from 'express';
 
 @Controller('contribution')
 export class ContributionController {
@@ -41,6 +44,17 @@ export class ContributionController {
       fileImages,
       fileDocxs,
     );
+  }
+
+  @Get('download-all')
+  async downloadAllContributionsAsZip(@Res() res: Response) {
+    try {
+      const zipFilePath = await this.contributionService.downloadAllContributionsAsZip();
+      res.download(zipFilePath);
+      console.log('đasadsa',zipFilePath)
+    } catch (error) {
+      res.status(500).send({ message: 'Failed to download all contributions' });
+    }
   }
 
   @Get()
@@ -86,4 +100,31 @@ export class ContributionController {
       return { data: result.data, message: 'Success' };
     }
   }
+  
+  @Get('download/:id')
+  async downloadContributionFilesAsZip(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const zipFilePath = await this.contributionService.downloadContributionFilesAsZip(id);
+      res.download(zipFilePath);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+  @Get('download/multiple/:ids')
+  async downloadMultipleContributionsAsZip(
+    @Param('ids') ids: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const zipFileName = await this.contributionService.downloadMultipleContributionsAsZip(ids.split(','));
+      res.download(zipFileName);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
 }

@@ -26,6 +26,9 @@ export class Contribution extends AbstractEntity {
   @Column('json')
   fileDocx: { file: string }[];
 
+  @Column('json', {nullable: true})
+  fileTitle: { file: string }[];
+
   @Column({
     type: 'enum',
     enum: StatusEnum,
