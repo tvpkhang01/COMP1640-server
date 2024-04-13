@@ -161,14 +161,16 @@ export class ContributionService {
 
         contribution.fileDocx = docxUrls;
       }
-      if (updateContributionDto.title !== contribution.title) {
+
+      if (updateContributionDto.title && updateContributionDto.title !== contribution.title) {
         const fileTitleUrl = await this.createAndUploadTitleFile(updateContributionDto.title);
         const fileTitleObject = { file: fileTitleUrl };
         contribution.fileTitle = [fileTitleObject];
       }
-
+    
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
+      contribution.term = updateContributionDto.term;
       await this.entityManager.save(contribution);
     } catch (error) {
       throw error;
