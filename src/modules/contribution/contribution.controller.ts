@@ -11,7 +11,6 @@ import {
   UseInterceptors,
   UploadedFiles,
   Res,
-  NotFoundException,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
@@ -39,6 +38,7 @@ export class ContributionController {
   ) {
     const fileImages = files.fileImage;
     const fileDocxs = files.fileDocx;
+
     return this.contributionService.create(
       createContributionDto,
       fileImages,
@@ -49,9 +49,10 @@ export class ContributionController {
   @Get('download-all')
   async downloadAllContributionsAsZip(@Res() res: Response) {
     try {
-      const zipFilePath = await this.contributionService.downloadAllContributionsAsZip();
+      const zipFilePath =
+        await this.contributionService.downloadAllContributionsAsZip();
       res.download(zipFilePath);
-      console.log('đasadsa',zipFilePath)
+      console.log('đasadsa', zipFilePath);
     } catch (error) {
       res.status(500).send({ message: 'Failed to download all contributions' });
     }
@@ -100,14 +101,15 @@ export class ContributionController {
       return { data: result.data, message: 'Success' };
     }
   }
-  
+
   @Get('download/:id')
   async downloadContributionFilesAsZip(
     @Param('id') id: string,
     @Res() res: Response,
   ) {
     try {
-      const zipFilePath = await this.contributionService.downloadContributionFilesAsZip(id);
+      const zipFilePath =
+        await this.contributionService.downloadContributionFilesAsZip(id);
       res.download(zipFilePath);
     } catch (error) {
       res.status(500).send(error.message);
@@ -120,11 +122,13 @@ export class ContributionController {
     @Res() res: Response,
   ) {
     try {
-      const zipFileName = await this.contributionService.downloadMultipleContributionsAsZip(ids.split(','));
+      const zipFileName =
+        await this.contributionService.downloadMultipleContributionsAsZip(
+          ids.split(','),
+        );
       res.download(zipFileName);
     } catch (error) {
       res.status(500).send(error.message);
     }
   }
-
 }

@@ -10,6 +10,7 @@ import { ContributionModule } from './modules/contribution/contribution.module';
 import { MagazineModule } from './modules/magazine/magazine.module';
 import { ContributionCommentModule } from './modules/comtributionComment/contributionComment.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from './modules/auth/auth.module';
     MagazineModule,
     ContributionCommentModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

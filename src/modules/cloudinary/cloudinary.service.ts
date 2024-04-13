@@ -7,7 +7,7 @@ import {
 } from 'cloudinary';
 import { Multer } from 'multer';
 import bufferToStream = require('buffer-to-stream');
-import path = require('path');
+// import path = require('path');
 
 @Injectable()
 export class CloudinaryService {
@@ -55,16 +55,20 @@ export class CloudinaryService {
     });
   }
 
-  async uploadTitleFile(filePath: string): Promise<UploadApiResponse | UploadApiErrorResponse> {
+  async uploadTitleFile(
+    filePath: string,
+  ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     try {
-        const result = await v2.uploader.upload(filePath, { resource_type: 'auto', format: 'txt' });
-        return result;
+      const result = await v2.uploader.upload(filePath, {
+        resource_type: 'auto',
+        format: 'txt',
+      });
+      return result;
     } catch (error) {
-        console.error('Error uploading title file to Cloudinary:', error);
-        throw error;
+      console.error('Error uploading title file to Cloudinary:', error);
+      throw error;
     }
-}
-
+  }
 
   async deleteFile(publicId: string): Promise<any> {
     return new Promise((resolve, reject) => {

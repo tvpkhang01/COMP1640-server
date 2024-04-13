@@ -12,4 +12,7 @@ export class CreateContributionDto {
   status: StatusEnum;
 
   term: TermEnum;
+
+  @IsNotEmpty()
+  studentId: string;
 }

@@ -92,6 +92,7 @@ export class UserService {
       user.dateOfBirth = updateUserDto.dateOfBirth;
       user.gender = updateUserDto.gender;
       user.role = updateUserDto.role;
+      user.facultyId = updateUserDto.facultyId;
 
       await this.entityManager.save(user);
     } catch (error) {
