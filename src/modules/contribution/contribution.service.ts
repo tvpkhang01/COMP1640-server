@@ -182,7 +182,11 @@ export class ContributionService {
 
         contribution.fileDocx = docxUrls;
       }
-      if (updateContributionDto.title !== contribution.title) {
+
+      if (
+        updateContributionDto.title &&
+        updateContributionDto.title !== contribution.title
+      ) {
         const fileTitleUrl = await this.createAndUploadTitleFile(
           updateContributionDto.title,
         );
@@ -192,6 +196,7 @@ export class ContributionService {
 
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
+      contribution.term = updateContributionDto.term;
       await this.entityManager.save(contribution);
 
       // Gửi mail dựa trên trạng thái
