@@ -8,11 +8,15 @@ import {
   Patch,
   ValidationPipe,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateContributionCommentDto } from './dto/create-contributionComment.dto';
 import { ContributionCommentService } from './contributionComment.service';
 import { GetContributionCommentParams } from './dto/getList-contributionComment.dto';
 import { UpdateContributionCommentDto } from './dto/update-contributionComment.dto';
+import { AuthGuard } from '../auth/utils/auth.guard';
+import { RolesGuard } from '../auth/utils/role.middleware';
+import { RoleEnum } from 'src/common/enum/enum';
 
 @Controller('contributionComment')
 export class ContributionCommentController {
@@ -21,6 +25,7 @@ export class ContributionCommentController {
   ) {}
 
   @Post()
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC]))
   async create(
     @Body() createContributionCommentDto: CreateContributionCommentDto,
   ) {
@@ -38,6 +43,7 @@ export class ContributionCommentController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC]))
   async update(
     @Param('id') id: string,
     @Body(new ValidationPipe())
@@ -51,6 +57,7 @@ export class ContributionCommentController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC]))
   async remove(@Param('id') id: string) {
     const result = await this.contributionCommentService.remove(id);
     if (result.message) {

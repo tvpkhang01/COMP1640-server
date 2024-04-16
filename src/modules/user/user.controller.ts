@@ -10,6 +10,7 @@ import {
   Patch,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
   // UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -17,9 +18,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserParams } from './dto/getList_user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-// import { AuthGuard } from '../auth/utils/auth.guard';
-// import { RolesGuard } from '../auth/utils/role.middleware';
-// import { RoleEnum } from 'src/common/enum/enum';
+import { AuthGuard } from '../auth/utils/auth.guard';
+import { RolesGuard } from '../auth/utils/role.middleware';
+import { RoleEnum } from 'src/common/enum/enum';
 import { Multer } from 'multer';
 
 @Controller('user')
@@ -27,6 +28,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.ADMIN]))
   @UseInterceptors(FileInterceptor('avatar'))
   async create(
     @Body() createUserDto: CreateUserDto,
@@ -52,6 +54,7 @@ export class UserController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   async update(
     @Param('id') id: string,
@@ -63,6 +66,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.ADMIN]))
   async remove(@Param('id') id: string) {
     const result = await this.userService.remove(id);
     if (result.message) {

@@ -8,17 +8,22 @@ import {
   Delete,
   Query,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { MagazineService } from './magazine.service';
 import { CreateMagazineDto } from './dto/create-magazine.dto';
 import { UpdateMagazineDto } from './dto/update-magazine.dto';
 import { GetMagazineParams } from './dto/getList-magazine.dto';
+import { AuthGuard } from '../auth/utils/auth.guard';
+import { RolesGuard } from '../auth/utils/role.middleware';
+import { RoleEnum } from 'src/common/enum/enum';
 
 @Controller('magazine')
 export class MagazineController {
   constructor(private readonly magazineService: MagazineService) {}
 
   @Post()
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async create(@Body() createMagazineDto: CreateMagazineDto) {
     return this.magazineService.create(createMagazineDto);
   }
@@ -34,6 +39,7 @@ export class MagazineController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updateMagazineDto: UpdateMagazineDto,
@@ -43,6 +49,7 @@ export class MagazineController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async remove(@Param('id') id: string) {
     const result = await this.magazineService.remove(id);
     if (result.message) {
