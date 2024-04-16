@@ -12,6 +12,7 @@ import {
   UploadedFiles,
   Res,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
@@ -20,12 +21,16 @@ import { GetContributionParams } from './dto/getList_contribition.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Multer } from 'multer';
 import { Response } from 'express';
+import { AuthGuard } from '../auth/utils/auth.guard';
+import { RolesGuard } from '../auth/utils/role.middleware';
+import { RoleEnum } from 'src/common/enum/enum';
 
 @Controller('contribution')
 export class ContributionController {
   constructor(private readonly contributionService: ContributionService) {}
 
   @Post()
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.STUDENT]))
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'fileImage', maxCount: 5 },
@@ -47,6 +52,7 @@ export class ContributionController {
   }
 
   @Get('download-all')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async downloadAllContributionsAsZip(@Res() res: Response) {
     try {
       const zipFilePath = await this.contributionService.downloadAllContributionsAsZip();
@@ -68,6 +74,7 @@ export class ContributionController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.STUDENT, RoleEnum.MC]))
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'fileImage', maxCount: 5 },
@@ -92,6 +99,7 @@ export class ContributionController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.STUDENT, RoleEnum.MC]))
   async remove(@Param('id') id: string) {
     const result = await this.contributionService.remove(id);
     if (result.message) {
@@ -102,6 +110,7 @@ export class ContributionController {
   }
   
   @Get('download/:id')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async downloadContributionFilesAsZip(
     @Param('id') id: string,
     @Res() res: Response,
@@ -115,6 +124,7 @@ export class ContributionController {
   }
 
   @Get('download/multiple/:ids')
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async downloadMultipleContributionsAsZip(
     @Param('ids') ids: string,
     @Res() res: Response,
