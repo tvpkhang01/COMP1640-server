@@ -75,6 +75,7 @@ export class ContributionService {
       faculty.coordinatorId,
     );
     await this.mailService.sendPendingMail(
+      contribution.id,
       coordinator.email,
       coordinator.userName,
     );
@@ -206,12 +207,14 @@ export class ContributionService {
       switch (contribution.status) {
         case 'approve':
           await this.mailService.sendApproveMail(
+            contribution.id,
             student.email,
             student.userName,
           );
           break;
         case 'reject':
           await this.mailService.sendRejectMail(
+            contribution.id,
             student.email,
             student.userName,
           );
@@ -224,6 +227,7 @@ export class ContributionService {
             faculty.coordinatorId,
           );
           await this.mailService.sendPendingMail(
+            contribution.id,
             coordinator.email,
             coordinator.userName,
           );

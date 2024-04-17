@@ -5,34 +5,49 @@ import { Injectable } from '@nestjs/common';
 export class MailService {
   constructor(private mailerService: MailerService) {}
 
-  async sendPendingMail(mcEmail: string, mcName: string) {
+  async sendPendingMail(
+    contributionId: string,
+    mcEmail: string,
+    mcName: string,
+  ) {
     await this.mailerService.sendMail({
       to: mcEmail,
       subject: 'Have a contribution need check!',
       template: './pendingMail.hbs',
       context: {
+        contributionId: contributionId,
         name: mcName,
       },
     });
   }
 
-  async sendApproveMail(studentEmail: string, studentName: string) {
+  async sendApproveMail(
+    contributionId: string,
+    studentEmail: string,
+    studentName: string,
+  ) {
     await this.mailerService.sendMail({
       to: studentEmail,
-      subject: 'Have a contribution need check!',
+      subject: 'Your contribution is approve!',
       template: './approveMail.hbs',
       context: {
+        contributionId: contributionId,
         name: studentName,
       },
     });
   }
 
-  async sendRejectMail(studentEmail: string, studentName: string) {
+  async sendRejectMail(
+    contributionId: string,
+    studentEmail: string,
+    studentName: string,
+  ) {
     await this.mailerService.sendMail({
       to: studentEmail,
-      subject: 'Have a contribution need check!',
+      subject: 'Your contribution is reject!',
       template: './rejectMail.hbs',
       context: {
+        contributionId: contributionId,
         name: studentName,
       },
     });
