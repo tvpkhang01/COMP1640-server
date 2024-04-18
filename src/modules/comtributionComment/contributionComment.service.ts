@@ -72,8 +72,6 @@ export class ContributionCommentService {
       contributionComment.coordinatorId =
         updateContributionCommentDto.coordinatorId;
       contributionComment.comment = updateContributionCommentDto.comment;
-      contributionComment.commentDate =
-        updateContributionCommentDto.commentDate;
 
       await this.entityManager.save(contributionComment);
       return { contributionComment, message: 'Successfully update comment' };

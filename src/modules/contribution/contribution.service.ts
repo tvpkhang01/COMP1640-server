@@ -170,7 +170,6 @@ export class ContributionService {
     
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
-      contribution.term = updateContributionDto.term;
       await this.entityManager.save(contribution);
     } catch (error) {
       throw error;
