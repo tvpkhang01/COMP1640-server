@@ -10,6 +10,4 @@ export class CreateContributionDto {
   fileDocx: { file: string }[];
 
   status: StatusEnum;
-
-  term: TermEnum;
 }

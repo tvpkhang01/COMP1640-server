@@ -170,7 +170,6 @@ export class ContributionService {
     
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
-      contribution.term = updateContributionDto.term;
       await this.entityManager.save(contribution);
     } catch (error) {
       throw error;
@@ -266,7 +265,6 @@ export class ContributionService {
       searchByUserName: '',
       title: '', 
       filePaths: [],
-      term: TermEnum.AGREE,
     });
     if (!contributionsResponse.data || contributionsResponse.data.length === 0) {
       throw new Error('No contributions found');

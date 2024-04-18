@@ -37,14 +37,6 @@ export class Contribution extends AbstractEntity {
   })
   status: StatusEnum;
 
-  @Column({
-    type: 'enum',
-    enum: TermEnum,
-    default: TermEnum.DISAGREE,
-    nullable: false,
-  })
-  term: TermEnum;
-
   // User/Student relationship
   @Column()
   studentId: string;

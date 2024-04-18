@@ -5,5 +5,4 @@ export class GetContributionParams extends PageOptionsDto {
   title: string;
   filePaths: { value: string }[];
   status: StatusEnum[];
-  term: TermEnum;
 }
