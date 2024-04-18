@@ -265,7 +265,6 @@ export class ContributionService {
       searchByUserName: '',
       title: '', 
       filePaths: [],
-      term: TermEnum.AGREE,
     });
     if (!contributionsResponse.data || contributionsResponse.data.length === 0) {
       throw new Error('No contributions found');
