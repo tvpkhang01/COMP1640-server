@@ -20,10 +20,10 @@ export class Contribution extends AbstractEntity {
   @Column()
   title: string;
 
-  @Column('json')
+  @Column('json', { nullable: true })
   fileImage: { file: string }[];
 
-  @Column('json')
+  @Column('json', { nullable: true })
   fileDocx: { file: string }[];
 
   @Column('json', { nullable: true })
