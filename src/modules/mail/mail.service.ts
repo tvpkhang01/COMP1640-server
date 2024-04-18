@@ -28,7 +28,7 @@ export class MailService {
   ) {
     await this.mailerService.sendMail({
       to: studentEmail,
-      subject: 'Your contribution is approve!',
+      subject: 'Your contribution has been approve!',
       template: './approveMail.hbs',
       context: {
         contributionId: contributionId,
@@ -44,7 +44,7 @@ export class MailService {
   ) {
     await this.mailerService.sendMail({
       to: studentEmail,
-      subject: 'Your contribution is reject!',
+      subject: 'Your contribution has been reject!',
       template: './rejectMail.hbs',
       context: {
         contributionId: contributionId,
