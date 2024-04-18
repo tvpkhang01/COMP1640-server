@@ -1,20 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contribution } from '../../entities/contribution.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
-import { Order, StatusEnum, TermEnum } from 'src/common/enum/enum';
+import { Order, StatusEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
 import { Multer } from 'multer';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import { UserService } from '../user/user.service';
+import { MailService } from '../mail/mail.service';
+import { FacultyService } from '../faculty/faculty.service';
 
 @Injectable()
 export class ContributionService {
@@ -23,7 +26,10 @@ export class ContributionService {
     private readonly contributionsRepository: Repository<Contribution>,
     private readonly entityManager: EntityManager,
     private readonly cloudinaryService: CloudinaryService,
-  ) { }
+    private readonly userService: UserService,
+    private readonly facultyService: FacultyService,
+    private readonly mailService: MailService,
+  ) {}
 
   async create(
     createContributionDto: CreateContributionDto,
@@ -32,7 +38,9 @@ export class ContributionService {
   ) {
     const contribution = new Contribution(createContributionDto);
 
-    const fileTitleUrl = await this.createAndUploadTitleFile(contribution.title);
+    const fileTitleUrl = await this.createAndUploadTitleFile(
+      contribution.title,
+    );
     contribution.fileTitle = [{ file: fileTitleUrl }];
 
     if (fileImages && fileImages.length > 0) {
@@ -58,6 +66,20 @@ export class ContributionService {
     }
 
     await this.entityManager.save(contribution);
+
+    const student = await this.userService.getUserById(
+      createContributionDto.studentId,
+    );
+    const faculty = await this.facultyService.getFacultyById(student.facultyId);
+    const coordinator = await this.userService.getUserById(
+      faculty.coordinatorId,
+    );
+    await this.mailService.sendPendingMail(
+      contribution.id,
+      coordinator.email,
+      coordinator.userName,
+    );
+
     return { contribution, message: 'Successfully create contribution' };
   }
 
@@ -162,15 +184,53 @@ export class ContributionService {
         contribution.fileDocx = docxUrls;
       }
 
-      if (updateContributionDto.title && updateContributionDto.title !== contribution.title) {
-        const fileTitleUrl = await this.createAndUploadTitleFile(updateContributionDto.title);
+      if (
+        updateContributionDto.title &&
+        updateContributionDto.title !== contribution.title
+      ) {
+        const fileTitleUrl = await this.createAndUploadTitleFile(
+          updateContributionDto.title,
+        );
         const fileTitleObject = { file: fileTitleUrl };
         contribution.fileTitle = [fileTitleObject];
       }
-    
+
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
       await this.entityManager.save(contribution);
+
+      const student = await this.userService.getUserById(
+        contribution.studentId,
+      );
+      switch (contribution.status) {
+        case 'approve':
+          await this.mailService.sendApproveMail(
+            contribution.id,
+            student.email,
+            student.userName,
+          );
+          break;
+        case 'reject':
+          await this.mailService.sendRejectMail(
+            contribution.id,
+            student.email,
+            student.userName,
+          );
+          break;
+        case 'pending':
+          const faculty = await this.facultyService.getFacultyById(
+            student.facultyId,
+          );
+          const coordinator = await this.userService.getUserById(
+            faculty.coordinatorId,
+          );
+          await this.mailService.sendPendingMail(
+            contribution.id,
+            coordinator.email,
+            coordinator.userName,
+          );
+          break;
+      }
     } catch (error) {
       throw error;
     }
@@ -243,13 +303,17 @@ export class ContributionService {
     }
   }
 
-  async downloadContributionFilesAsZip(contributionId: string): Promise<string> {
+  async downloadContributionFilesAsZip(
+    contributionId: string,
+  ): Promise<string> {
     const zip = await this.createZipForContribution([contributionId]);
     const zipFileName = `contribution_${contributionId}.zip`;
     return this.saveZipToFile(zip, zipFileName);
   }
 
-  async downloadMultipleContributionsAsZip(contributionIds: string[]): Promise<string> {
+  async downloadMultipleContributionsAsZip(
+    contributionIds: string[],
+  ): Promise<string> {
     const zip = await this.createZipForContribution(contributionIds);
     const zipFileName = `contributions_${contributionIds.join('_')}.zip`;
     return this.saveZipToFile(zip, zipFileName);
@@ -263,19 +327,26 @@ export class ContributionService {
       order: Order.ASC,
       searchByTitle: '',
       searchByUserName: '',
-      title: '', 
+      title: '',
       filePaths: [],
     });
-    if (!contributionsResponse.data || contributionsResponse.data.length === 0) {
+    if (
+      !contributionsResponse.data ||
+      contributionsResponse.data.length === 0
+    ) {
       throw new Error('No contributions found');
     }
-    const contributionIds = contributionsResponse.data.map(contribution => contribution.id);
+    const contributionIds = contributionsResponse.data.map(
+      (contribution) => contribution.id,
+    );
     const zip = await this.createZipForContribution(contributionIds);
     const zipFileName = `all_contributions.zip`;
     return this.saveZipToFile(zip, zipFileName);
   }
 
-  private async createZipForContribution(contributionIds: string[]): Promise<JSZip> {
+  private async createZipForContribution(
+    contributionIds: string[],
+  ): Promise<JSZip> {
     const zip = new JSZip();
     for (const id of contributionIds) {
       const contribution = await this.getContributionById(id);
@@ -310,7 +381,12 @@ export class ContributionService {
 
   private async saveZipToFile(zip: JSZip, fileName: string): Promise<string> {
     const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-    const zipFilePath = path.join(__dirname, '../../../', 'downloads', fileName);
+    const zipFilePath = path.join(
+      __dirname,
+      '../../../',
+      'downloads',
+      fileName,
+    );
     fs.writeFileSync(zipFilePath, zipBuffer);
     return zipFilePath;
   }
@@ -318,7 +394,7 @@ export class ContributionService {
   async downloadFile(url: string): Promise<Buffer> {
     try {
       const response = await axios.get(url, {
-        responseType: 'arraybuffer'
+        responseType: 'arraybuffer',
       });
 
       return Buffer.from(response.data, 'binary');

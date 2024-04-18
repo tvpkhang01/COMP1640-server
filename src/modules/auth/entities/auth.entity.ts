@@ -1,15 +1,15 @@
-import { Column, PrimaryGeneratedColumn } from "typeorm";
+import { Column } from 'typeorm';
 
 export class Auth {
-    @Column()
-    id: string;
-  
-    @Column()
-    userName: string;
+  @Column()
+  id: string;
 
-    @Column()
-    password: string;
+  @Column()
+  userName: string;
 
-    @Column()
-    role: string;
+  @Column()
+  password: string;
+
+  @Column()
+  role: string;
 }

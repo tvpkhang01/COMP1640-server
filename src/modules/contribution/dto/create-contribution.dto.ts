@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { StatusEnum, TermEnum } from 'src/common/enum/enum';
+import { StatusEnum } from 'src/common/enum/enum';
 
 export class CreateContributionDto {
   @IsNotEmpty()
@@ -10,4 +10,6 @@ export class CreateContributionDto {
   fileDocx: { file: string }[];
 
   status: StatusEnum;
+  @IsNotEmpty()
+  studentId: string;
 }

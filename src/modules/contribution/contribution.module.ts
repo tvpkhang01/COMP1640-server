@@ -13,6 +13,10 @@ import { ContributionCommentController } from '../comtributionComment/contributi
 import { ContributionCommentService } from '../comtributionComment/contributionComment.service';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { FacultyService } from '../faculty/faculty.service';
+import { MailService } from 'src/modules/mail/mail.service';
+import { Faculty } from 'src/entities/faculty.entity';
+import { FacultyController } from '../faculty/faculty.controller';
 
 @Module({
   imports: [
@@ -21,20 +25,24 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
       User,
       Magazine,
       ContributionComment,
+      Faculty,
     ]),
   ],
   controllers: [
     ContributionController,
     UserController,
+    FacultyController,
     MagazineController,
     ContributionCommentController,
   ],
   providers: [
     ContributionService,
     UserService,
+    FacultyService,
     MagazineService,
     ContributionCommentService,
     CloudinaryService,
+    MailService,
   ],
 })
 export class ContributionModule {}
