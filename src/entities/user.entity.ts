@@ -1,5 +1,5 @@
-import { GenderEnum, RoleEnum } from 'src/common/enum/enum';
-import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { GenderEnum, RoleEnum } from '../common/enum/enum';
+import { AbstractEntity } from '../common/entities/abstract.entity';
 import {
   Column,
   Entity,

@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { GenderEnum, RoleEnum } from 'src/common/enum/enum';
+import { GenderEnum, RoleEnum } from '../../../common/enum/enum';
 
 export class CreateUserDto {
   @IsNotEmpty()

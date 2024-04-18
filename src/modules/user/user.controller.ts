@@ -20,7 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '../auth/utils/auth.guard';
 import { RolesGuard } from '../auth/utils/role.middleware';
-import { RoleEnum } from 'src/common/enum/enum';
+import { RoleEnum } from '../../common/enum/enum'; 
 import { Multer } from 'multer';
 
 @Controller('user')
