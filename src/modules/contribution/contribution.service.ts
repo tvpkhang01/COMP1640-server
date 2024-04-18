@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Contribution } from 'src/entities/contribution.entity';
+import { Contribution } from '../../entities/contribution.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { Order, StatusEnum, TermEnum } from 'src/common/enum/enum';

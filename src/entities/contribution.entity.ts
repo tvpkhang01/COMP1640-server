@@ -1,4 +1,4 @@
-import { AbstractEntity } from 'src/common/entities/abstract.entity';
+import { AbstractEntity } from '../common/entities/abstract.entity';
 import {
   Column,
   Entity,
@@ -7,7 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { StatusEnum, TermEnum } from 'src/common/enum/enum';
+import { StatusEnum, TermEnum } from '../common/enum/enum';
 import { User } from './user.entity';
 import { Magazine } from './magazine.entity';
 import { ContributionComment } from './contributionComment.entity';

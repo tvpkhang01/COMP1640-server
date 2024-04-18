@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { User } from 'src/entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { Order } from 'src/common/constants/enum';
+import { Order } from '../../common/constants/enum'; 
 import { GetUserParams } from './dto/getList_user.dto';
-import { PageMetaDto } from 'src/common/dtos/pageMeta';
-import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
+import { PageMetaDto } from '../../common/dtos/pageMeta'; 
+import { ResponsePaginate } from '../../common/dtos/responsePaginate'; 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Contribution } from 'src/entities/contribution.entity';
-import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { Contribution } from '../../entities/contribution.entity'; 
+import { ContributionComment } from '../../entities/contributionComment.entity'; 
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Multer } from 'multer';
 
