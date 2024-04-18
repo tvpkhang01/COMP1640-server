@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Contribution } from 'src/entities/contribution.entity';
+import { Contribution } from '../../entities/contribution.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
-import { Order, StatusEnum, TermEnum } from 'src/common/enum/enum';
+import { Order, StatusEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
 import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
 import { ContributionComment } from 'src/entities/contributionComment.entity';
@@ -197,7 +197,6 @@ export class ContributionService {
 
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
-      contribution.term = updateContributionDto.term;
       await this.entityManager.save(contribution);
 
       // Gửi mail dựa trên trạng thái
@@ -331,7 +330,6 @@ export class ContributionService {
       searchByUserName: '',
       title: '',
       filePaths: [],
-      term: TermEnum.AGREE,
     });
     if (
       !contributionsResponse.data ||

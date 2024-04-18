@@ -1,4 +1,4 @@
-import { AbstractEntity } from 'src/common/entities';
+import { AbstractEntity } from '../common/entities/abstract.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Magazine } from './magazine.entity';
 

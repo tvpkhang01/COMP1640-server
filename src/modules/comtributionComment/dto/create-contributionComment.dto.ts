@@ -9,7 +9,4 @@ export class CreateContributionCommentDto {
 
   @IsNotEmpty()
   comment: string;
-
-  @IsNotEmpty()
-  commentDate: Date;
 }

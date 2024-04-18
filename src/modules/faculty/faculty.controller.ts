@@ -23,7 +23,7 @@ export class FacultyController {
   constructor(private readonly facultyService: FacultyService) {}
 
   @Post()
-  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC]))
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC, RoleEnum.ADMIN]))
   async create(@Body() createFacultyDto: CreateFacultyDto) {
     return this.facultyService.create(createFacultyDto);
   }
@@ -39,7 +39,7 @@ export class FacultyController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC]))
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC, RoleEnum.ADMIN]))
   async update(
     @Param('id') id: string,
     @Body(new ValidationPipe()) updateFacultyDto: UpdateFacultyDto,
@@ -49,7 +49,7 @@ export class FacultyController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC]))
+  @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MC, RoleEnum.ADMIN]))
   async remove(@Param('id') id: string) {
     const result = await this.facultyService.remove(id);
     if (result.message) {
