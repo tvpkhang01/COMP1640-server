@@ -199,7 +199,6 @@ export class ContributionService {
       contribution.status = updateContributionDto.status;
       await this.entityManager.save(contribution);
 
-      // Gửi mail dựa trên trạng thái
       const student = await this.userService.getUserById(
         contribution.studentId,
       );
