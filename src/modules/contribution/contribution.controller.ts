@@ -23,7 +23,7 @@ import { Multer } from 'multer';
 import { Response } from 'express';
 import { AuthGuard } from '../auth/utils/auth.guard';
 import { RolesGuard } from '../auth/utils/role.middleware';
-import { RoleEnum } from 'src/common/enum/enum';
+import { RoleEnum } from '../..//common/enum/enum';
 
 @Controller('contribution')
 export class ContributionController {
@@ -57,7 +57,6 @@ export class ContributionController {
     try {
       const zipFilePath = await this.contributionService.downloadAllContributionsAsZip();
       res.download(zipFilePath);
-      console.log('đasadsa',zipFilePath)
     } catch (error) {
       res.status(500).send({ message: 'Failed to download all contributions' });
     }

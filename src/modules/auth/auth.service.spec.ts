@@ -1,42 +1,57 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
-import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
-import { User } from '../../entities/user.entity';
-import { GenderEnum, RoleEnum } from '../../common/enum/enum';
-import { jwtConstants } from './utils/constants';
+import { Repository } from 'typeorm';
 import { Auth } from './entities/auth.entity';
+import { GenderEnum, RoleEnum } from '../../common/enum/enum';
+import { User } from '../../entities/user.entity';
 import { AuthController } from './auth.controller';
 import { UserController } from '../user/user.controller';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { jwtConstants } from './utils/constants';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('AuthService', () => {
   let authService: AuthService;
   let userService: UserService;
   let jwtService: JwtService;
-  let userRepository: Repository<User>;
+  let authRepository: Repository<Auth>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forFeature([Auth, User]),
-        JwtModule.register({
-          global: true,
-          secret: jwtConstants.secret,
-          signOptions: { expiresIn: '2h' },
-        }),
-      ],
+      imports: [],
       controllers: [AuthController, UserController],
-      providers: [AuthService, UserService, CloudinaryService],
+      providers: [
+        AuthService,
+        {
+          provide: UserService,
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            signAsync: jest.fn(),
+            verify: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Auth),
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        CloudinaryService,
+      ],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
     userService = module.get<UserService>(UserService);
     jwtService = module.get<JwtService>(JwtService);
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    authRepository = module.get<Repository<Auth>>(getRepositoryToken(Auth));
   });
 
   afterEach(() => {
@@ -47,34 +62,38 @@ describe('AuthService', () => {
     it('should sign in and return access token', async () => {
       const mockUser: User = {
         id: 'efcea8e9-a2ad-494f-a54c-3145e9329db4',
-        userName: 'Student 1',
-        password: '123456789',
+        userName: 'testuser',
+        password: 'password',
         code: 'GCD202000',
-        email: 'thang@gmail.com',
+        email: 'testuser@example.com',
         phone: '0123456789',
-        dateOfBirth: undefined,
+        dateOfBirth: new Date(),
         avatar: '',
         gender: GenderEnum.MALE,
-        role: RoleEnum.ADMIN,
+        role: RoleEnum.STUDENT,
         facultyId: '',
-        faculty: undefined,
+        faculty: null,
         contribution: [],
         contributionComment: [],
-        createdAt: undefined,
-        createdBy: '',
-        updatedAt: undefined,
-        updatedBy: '',
-        deletedAt: undefined,
-        deletedBy: ''
+        createdAt: new Date(),
+        createdBy: 'admin',
+        updatedAt: new Date(),
+        updatedBy: 'admin',
+        deletedAt: null,
+        deletedBy: null,
       };
 
       jest.spyOn(userService, 'findOne').mockResolvedValue(mockUser);
       jest.spyOn(jwtService, 'signAsync').mockResolvedValue('mocked_access_token');
 
-      const result = await authService.signIn('Student 1', '123456789');
+      const result = await authService.signIn('testuser', 'password');
 
-      expect(userService.findOne).toHaveBeenCalledWith('Student 1');
-      expect(jwtService.signAsync).toHaveBeenCalledWith({ sub: 'efcea8e9-a2ad-494f-a54c-3145e9329db4', username: 'Student 1', role: RoleEnum.ADMIN });
+      expect(userService.findOne).toHaveBeenCalledWith('testuser');
+      expect(jwtService.signAsync).toHaveBeenCalledWith({
+        sub: 'efcea8e9-a2ad-494f-a54c-3145e9329db4',
+        username: 'testuser',
+        role: RoleEnum.STUDENT,
+      });
       expect(result).toEqual({ access_token: 'mocked_access_token' });
     });
 
@@ -86,25 +105,25 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException when password is incorrect', async () => {
       const mockUser: User = {
         id: 'efcea8e9-a2ad-494f-a54c-3145e9329db4',
-        userName: 'Student 1',
-        password: '123456789',
+        userName: 'testuser',
+        password: 'password',
         code: 'GCD202000',
-        email: 'thang@gmail.com',
+        email: 'testuser@example.com',
         phone: '0123456789',
-        dateOfBirth: undefined,
+        dateOfBirth: new Date(),
         avatar: '',
         gender: GenderEnum.MALE,
-        role: RoleEnum.ADMIN,
+        role: RoleEnum.STUDENT,
         facultyId: '',
-        faculty: undefined,
+        faculty: null,
         contribution: [],
         contributionComment: [],
-        createdAt: undefined,
-        createdBy: '',
-        updatedAt: undefined,
-        updatedBy: '',
-        deletedAt: undefined,
-        deletedBy: ''
+        createdAt: new Date(),
+        createdBy: 'admin',
+        updatedAt: new Date(),
+        updatedBy: 'admin',
+        deletedAt: null,
+        deletedBy: null,
       };
 
       jest.spyOn(userService, 'findOne').mockResolvedValue(mockUser);
@@ -115,21 +134,21 @@ describe('AuthService', () => {
   describe('validateUserFromToken', () => {
     it('should validate user from token', async () => {
       const token = 'mocked_token';
-      const decodedToken = { sub: 'efcea8e9-a2ad-494f-a54c-3145e9329db4' };
+      const decodedToken = { id: 'efcea8e9-a2ad-494f-a54c-3145e9329db4' };
 
       jest.spyOn(jwtService, 'verify').mockReturnValue(decodedToken);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue({} as User);
+      jest.spyOn(authRepository, 'findOne').mockResolvedValue({} as Auth);
 
       const result = await authService.validateUserFromToken(token);
 
       expect(jwtService.verify).toHaveBeenCalledWith(token);
-      expect(userRepository.findOne).toHaveBeenCalledWith('efcea8e9-a2ad-494f-a54c-3145e9329db4');
+      expect(authRepository.findOne).toHaveBeenCalledWith({ where: { id: 'efcea8e9-a2ad-494f-a54c-3145e9329db4' } });
       expect(result).toEqual({});
     });
 
     it('should throw UnauthorizedException if token is invalid', async () => {
       jest.spyOn(jwtService, 'verify').mockImplementation(() => {
-        throw new Error();
+        throw new UnauthorizedException();
       });
 
       await expect(authService.validateUserFromToken('invalid_token')).rejects.toThrow(UnauthorizedException);
@@ -137,10 +156,10 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if user not found', async () => {
       const token = 'mocked_token';
-      const decodedToken = { sub: 'efcea8e9-a2ad-494f-a54c-3145e9329db4' };
+      const decodedToken = { id: '1efcea8e9-a2ad-494f-a54c-3145e9329db4' };
 
       jest.spyOn(jwtService, 'verify').mockReturnValue(decodedToken);
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(undefined);
+      jest.spyOn(authRepository, 'findOne').mockResolvedValue(undefined);
 
       await expect(authService.validateUserFromToken(token)).rejects.toThrow(UnauthorizedException);
     });

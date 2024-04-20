@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSemesterDto } from './dto/create-semester.dto';
 import { UpdateSemesterDto } from './dto/update-semester.dto';
-import { Semester } from 'src/entities/semester.entity';
+import { Semester } from '../../entities/semester.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { GetSemesterParams } from './dto/getList_semester.dto';
-import { Order } from 'src/common/enum/enum';
-import { PageMetaDto } from 'src/common/dtos/pageMeta';
-import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
-import { Magazine } from 'src/entities/magazine.entity';
+import { Order } from '../../common/enum/enum';
+import { PageMetaDto } from '../../common/dtos/pageMeta';
+import { ResponsePaginate } from '../../common/dtos/responsePaginate';
+import { Magazine } from '../../entities/magazine.entity';
 
 @Injectable()
 export class SemesterService {
