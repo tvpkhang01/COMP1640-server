@@ -11,7 +11,6 @@ import {
   UseInterceptors,
   UploadedFiles,
   Res,
-  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import { ContributionService } from './contribution.service';
@@ -44,6 +43,7 @@ export class ContributionController {
   ) {
     const fileImages = files.fileImage;
     const fileDocxs = files.fileDocx;
+
     return this.contributionService.create(
       createContributionDto,
       fileImages,
@@ -55,7 +55,8 @@ export class ContributionController {
   @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async downloadAllContributionsAsZip(@Res() res: Response) {
     try {
-      const zipFilePath = await this.contributionService.downloadAllContributionsAsZip();
+      const zipFilePath =
+        await this.contributionService.downloadAllContributionsAsZip();
       res.download(zipFilePath);
     } catch (error) {
       res.status(500).send({ message: 'Failed to download all contributions' });
@@ -107,7 +108,7 @@ export class ContributionController {
       return { data: result.data, message: 'Success' };
     }
   }
-  
+
   @Get('download/:id')
   @UseGuards(AuthGuard, new RolesGuard([RoleEnum.MM]))
   async downloadContributionFilesAsZip(
@@ -115,7 +116,8 @@ export class ContributionController {
     @Res() res: Response,
   ) {
     try {
-      const zipFilePath = await this.contributionService.downloadContributionFilesAsZip(id);
+      const zipFilePath =
+        await this.contributionService.downloadContributionFilesAsZip(id);
       res.download(zipFilePath);
     } catch (error) {
       res.status(500).send(error.message);
@@ -129,11 +131,13 @@ export class ContributionController {
     @Res() res: Response,
   ) {
     try {
-      const zipFileName = await this.contributionService.downloadMultipleContributionsAsZip(ids.split(','));
+      const zipFileName =
+        await this.contributionService.downloadMultipleContributionsAsZip(
+          ids.split(','),
+        );
       res.download(zipFileName);
     } catch (error) {
       res.status(500).send(error.message);
     }
   }
-
 }

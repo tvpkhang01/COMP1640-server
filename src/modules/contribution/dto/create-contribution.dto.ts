@@ -10,4 +10,6 @@ export class CreateContributionDto {
   fileDocx: { file: string }[];
 
   status: StatusEnum;
+  @IsNotEmpty()
+  studentId: string;
 }

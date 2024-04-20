@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CloudinaryService } from './cloudinary.service';
 import { Multer } from 'multer';
-import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import { UploadApiResponse } from 'cloudinary';
 
 describe('CloudinaryService', () => {
   let service: CloudinaryService;
@@ -46,7 +46,7 @@ describe('CloudinaryService', () => {
       moderation: [],
       access_control: [],
       context: undefined,
-      metadata: undefined
+      metadata: undefined,
     };
 
     jest.spyOn(service, 'uploadImageFile').mockResolvedValue(uploadResponse);
@@ -61,7 +61,8 @@ describe('CloudinaryService', () => {
       fieldname: 'docx',
       originalname: 'test.docx',
       encoding: '7bit',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      mimetype:
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       size: 1000,
       buffer: Buffer.from('test-docx-buffer'),
     };
@@ -88,7 +89,7 @@ describe('CloudinaryService', () => {
       moderation: [],
       access_control: [],
       context: undefined,
-      metadata: undefined
+      metadata: undefined,
     };
 
     jest.spyOn(service, 'uploadDocxFile').mockResolvedValue(uploadResponse);
@@ -123,7 +124,7 @@ describe('CloudinaryService', () => {
       moderation: [],
       access_control: [],
       context: undefined,
-      metadata: undefined
+      metadata: undefined,
     };
 
     jest.spyOn(service, 'uploadTitleFile').mockResolvedValue(uploadResponse);
@@ -169,7 +170,8 @@ describe('CloudinaryService', () => {
   });
 
   it('should extract public ID from URL', () => {
-    const fileUrl = 'https://res.cloudinary.com/dnjkwuc7p/image/upload/v1647778468/test_public_id.jpg';
+    const fileUrl =
+      'https://res.cloudinary.com/dnjkwuc7p/image/upload/v1647778468/test_public_id.jpg';
     const publicId = 'test_public_id';
 
     const result = service.extractPublicIdFromUrl(fileUrl);
@@ -178,7 +180,8 @@ describe('CloudinaryService', () => {
   });
 
   it('should extract public ID from DOCX URL', () => {
-    const fileUrl = 'https://res.cloudinary.com/dnjkwuc7p/raw/upload/v1647778468/test_docx_public_id.docx';
+    const fileUrl =
+      'https://res.cloudinary.com/dnjkwuc7p/raw/upload/v1647778468/test_docx_public_id.docx';
     const publicId = 'test_docx_public_id.docx';
 
     const result = service.extractPublicIdFromDocxUrl(fileUrl);

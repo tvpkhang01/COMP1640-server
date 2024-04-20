@@ -84,7 +84,9 @@ describe('AuthService', () => {
       };
 
       jest.spyOn(userService, 'findOne').mockResolvedValue(mockUser);
-      jest.spyOn(jwtService, 'signAsync').mockResolvedValue('mocked_access_token');
+      jest
+        .spyOn(jwtService, 'signAsync')
+        .mockResolvedValue('mocked_access_token');
 
       const result = await authService.signIn('testuser', 'password');
 
@@ -99,7 +101,9 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException when user not found', async () => {
       jest.spyOn(userService, 'findOne').mockResolvedValue(undefined);
-      await expect(authService.signIn('testuser', 'password')).rejects.toThrow(UnauthorizedException);
+      await expect(authService.signIn('testuser', 'password')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException when password is incorrect', async () => {
@@ -127,7 +131,9 @@ describe('AuthService', () => {
       };
 
       jest.spyOn(userService, 'findOne').mockResolvedValue(mockUser);
-      await expect(authService.signIn('testuser', 'wrong_password')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        authService.signIn('testuser', 'wrong_password'),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -151,7 +157,9 @@ describe('AuthService', () => {
         throw new UnauthorizedException();
       });
 
-      await expect(authService.validateUserFromToken('invalid_token')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        authService.validateUserFromToken('invalid_token'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -161,7 +169,9 @@ describe('AuthService', () => {
       jest.spyOn(jwtService, 'verify').mockReturnValue(decodedToken);
       jest.spyOn(authRepository, 'findOne').mockResolvedValue(undefined);
 
-      await expect(authService.validateUserFromToken(token)).rejects.toThrow(UnauthorizedException);
+      await expect(authService.validateUserFromToken(token)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });
