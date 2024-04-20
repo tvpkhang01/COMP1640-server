@@ -16,7 +16,7 @@ import { GetContributionCommentParams } from './dto/getList-contributionComment.
 import { UpdateContributionCommentDto } from './dto/update-contributionComment.dto';
 import { AuthGuard } from '../auth/utils/auth.guard';
 import { RolesGuard } from '../auth/utils/role.middleware';
-import { RoleEnum } from 'src/common/enum/enum';
+import { RoleEnum } from '../../common/enum/enum';
 
 @Controller('contributionComment')
 export class ContributionCommentController {

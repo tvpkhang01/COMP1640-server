@@ -16,7 +16,7 @@ import { UpdateMagazineDto } from './dto/update-magazine.dto';
 import { GetMagazineParams } from './dto/getList-magazine.dto';
 import { AuthGuard } from '../auth/utils/auth.guard';
 import { RolesGuard } from '../auth/utils/role.middleware';
-import { RoleEnum } from 'src/common/enum/enum';
+import { RoleEnum } from '../../common/enum/enum';
 
 @Controller('magazine')
 export class MagazineController {

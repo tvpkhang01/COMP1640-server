@@ -4,11 +4,11 @@ import { UpdateMagazineDto } from './dto/update-magazine.dto';
 import { GetMagazineParams } from './dto/getList-magazine.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { Order } from 'src/common/enum/enum';
-import { PageMetaDto } from 'src/common/dtos/pageMeta';
-import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
-import { Magazine } from 'src/entities/magazine.entity';
-import { Contribution } from 'src/entities/contribution.entity';
+import { Order } from '../../common/enum/enum';
+import { PageMetaDto } from '../../common/dtos/pageMeta';
+import { ResponsePaginate } from '../../common/dtos/responsePaginate';
+import { Magazine } from '../../entities/magazine.entity';
+import { Contribution } from '../../entities/contribution.entity';
 
 @Injectable()
 export class MagazineService {

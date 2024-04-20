@@ -16,7 +16,7 @@ import { UpdateSemesterDto } from './dto/update-semester.dto';
 import { GetSemesterParams } from './dto/getList_semester.dto';
 import { AuthGuard } from '../auth/utils/auth.guard';
 import { RolesGuard } from '../auth/utils/role.middleware';
-import { RoleEnum } from 'src/common/enum/enum';
+import { RoleEnum } from '../../common/enum/enum';
 
 @Controller('semester')
 export class SemesterController {

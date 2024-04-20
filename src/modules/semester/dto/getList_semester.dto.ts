@@ -1,4 +1,4 @@
-import { PageOptionsDto } from 'src/common/dtos/pageOption';
+import { PageOptionsDto } from '../../../common/dtos/pageOption';
 
 export class GetSemesterParams extends PageOptionsDto {
   semesterName: string;
