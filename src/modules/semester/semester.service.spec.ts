@@ -135,6 +135,7 @@ describe('SemesterService', () => {
       expect(mockQueryBuilder.getOne).toHaveBeenCalled();
     });
   });
+  
   describe('update', () => {
     it('should update semester with valid input', async () => {
       const id = '123456';

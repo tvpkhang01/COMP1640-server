@@ -17,6 +17,8 @@ import { FacultyService } from '../faculty/faculty.service';
 import { MailService } from 'src/modules/mail/mail.service';
 import { Faculty } from 'src/entities/faculty.entity';
 import { FacultyController } from '../faculty/faculty.controller';
+import { SemesterService } from '../semester/semester.service';
+import { Semester } from '../../entities/semester.entity';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { FacultyController } from '../faculty/faculty.controller';
       Magazine,
       ContributionComment,
       Faculty,
+      Semester
     ]),
   ],
   controllers: [
@@ -43,6 +46,7 @@ import { FacultyController } from '../faculty/faculty.controller';
     ContributionCommentService,
     CloudinaryService,
     MailService,
+    SemesterService
   ],
 })
 export class ContributionModule {}

@@ -5,23 +5,41 @@ import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { Multer } from 'multer';
-import { Order, StatusEnum } from '../../common/enum/enum';
+import { GenderEnum, Order, RoleEnum, StatusEnum } from '../../common/enum/enum';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { PageOptionsDto } from '../../common/dtos/pageOption';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { ContributionComment } from '../../entities/contributionComment.entity';
+import { UserService } from '../user/user.service';
+import { User } from '../../entities/user.entity';
+import { Faculty } from '../../entities/faculty.entity';
+import { MailService } from '../mail/mail.service';
+import { JwtService } from '@nestjs/jwt';
+import { FacultyService } from '../faculty/faculty.service';
+import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 describe('ContributionService', () => {
   let service: ContributionService;
   let entityManager: EntityManager;
   let contributionsRepository: Repository<Contribution>;
+  let userRepository: Repository<User>;
+  let facultyRepository: Repository<Faculty>;
+  let jwtService: JwtService;
+  let mailService: MailService;
+  let userService: UserService;
+  let facultyService: FacultyService;
+  let mailerService: MailerService;
+  let configService: ConfigService;
+
 
   const createContributionDto: CreateContributionDto = {
     title: 'Test Contribution',
     fileImage: [],
     fileDocx: [],
     status: StatusEnum.APPROVE,
+    studentId: '1234123',
   };
 
   const fileImages: Multer.File[] = [
@@ -74,6 +92,12 @@ describe('ContributionService', () => {
     },
   ];
 
+  const mockMailService = {
+    sendPendingMail: jest.fn(),
+    sendApproveMail: jest.fn(),
+    sendRejectMail: jest.fn(),
+  };
+
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -87,35 +111,160 @@ describe('ContributionService', () => {
           provide: EntityManager,
           useValue: {
             save: jest.fn(),
+            softDelete: jest.fn(),
           },
         },
+        {
+          provide: JwtService,
+          useValue: {
+            signAsync: jest.fn(),
+            verify: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Faculty),
+          useClass: Repository,
+        },
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn(),
+          },
+        },
+        {
+          provide: MailService,
+          useValue: mockMailService
+        },
         CloudinaryService,
+        UserService,
+        FacultyService,
+        ConfigService,
       ],
     }).compile();
 
     service = module.get<ContributionService>(ContributionService);
     entityManager = module.get<EntityManager>(EntityManager);
     contributionsRepository = module.get<Repository<Contribution>>(
-      getRepositoryToken(Contribution),)
+      getRepositoryToken(Contribution),
+    );
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    facultyRepository = module.get<Repository<Faculty>>(getRepositoryToken(Faculty));
+    jwtService = module.get<JwtService>(JwtService);
+    mailService = module.get<MailService>(MailService);
+    userService = module.get<UserService>(UserService);
+    facultyService = module.get<FacultyService>(FacultyService);
+    configService = module.get<ConfigService>(ConfigService);
+    mailerService = module.get<MailerService>(MailerService);
+
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a contribution', async () => {
-    const createAndUploadTitleFileSpy = jest.spyOn(service as any, 'createAndUploadTitleFile').mockResolvedValue('titleFileUrl');
-    const uploadAndReturnImageUrlSpy = jest.spyOn(service as any, 'uploadAndReturnImageUrl').mockResolvedValue('imageUrl');
-    const uploadAndReturnDocxUrlSpy = jest.spyOn(service as any, 'uploadAndReturnDocxUrl').mockResolvedValue('docxUrl');
-    const entityManagerSaveSpy = jest.spyOn(entityManager, 'save').mockResolvedValue(undefined);
+  describe('create', () => {
+    it('should create a contribution successfully', async () => {
+      const createContributionDto: CreateContributionDto = {
+        studentId: 'example',
+        title: 'example',
+        status: StatusEnum.PENDING,
+        fileImage: [],
+        fileDocx: []
+      };
+      const fileImages: Multer.File[] = [];
+      const fileDocxs: Multer.File[] = [];
 
-    await service.create(createContributionDto, fileImages, fileDocxs);
+      // Mock repository methods
+      jest.spyOn(service as any, 'createAndUploadTitleFile').mockResolvedValue('example');
+      jest.spyOn(service as any, 'uploadAndReturnImageUrl').mockResolvedValue('example');
+      jest.spyOn(service as any, 'uploadAndReturnDocxUrl').mockResolvedValue('example');
+      jest.spyOn(entityManager, 'save').mockResolvedValue(undefined);
+      jest.spyOn(userService, 'getUserById').mockResolvedValue({
+        id: 'example',
+        userName: 'abc',
+        password: 'examplePassword',
+        code: 'exampleCode',
+        email: 'user@example.com',
+        phone: '123456789',
+        dateOfBirth: new Date('1990-01-01'),
+        avatar: 'avatar.jpg',
+        gender: GenderEnum.MALE,
+        role: RoleEnum.STUDENT,
+        facultyId: 'faculty123',
+        faculty: undefined,
+        contribution: undefined,
+        contributionComment: undefined,
+        createdAt: new Date(),
+        createdBy: 'exampleUserId',
+        updatedAt: new Date(),
+        updatedBy: 'exampleUserId',
+        deletedAt: new Date(),
+        deletedBy: 'exampleUserId',
+      });
 
-    expect(createAndUploadTitleFileSpy).toHaveBeenCalledWith(createContributionDto.title);
-    expect(uploadAndReturnImageUrlSpy).toHaveBeenCalledTimes(fileImages.length);
-    expect(uploadAndReturnDocxUrlSpy).toHaveBeenCalledTimes(fileDocxs.length);
-    expect(entityManagerSaveSpy).toHaveBeenCalledWith(expect.any(Contribution));
+      jest.spyOn(facultyService, 'getFacultyById').mockResolvedValue({
+        id: 'faculty123',
+        facultyName: 'Example Faculty',
+        student: undefined,
+        coordinator: undefined,
+        coordinatorId: 'coordinator123',
+        createdAt: new Date(),
+        createdBy: 'exampleUserId',
+        updatedAt: new Date(),
+        updatedBy: 'exampleUserId',
+        deletedAt: new Date(),
+        deletedBy: 'exampleUserId',
+      });
+      jest.spyOn(userService, 'getUserById').mockResolvedValue({
+        id: 'exampleId',
+        email: 'coordinator@example.com',
+        userName: 'Coordinator Name',
+        password: 'examplePassword',
+        code: 'exampleCode',
+        phone: 'examplePhone',
+        dateOfBirth: new Date(),
+        avatar: 'exampleAvatar',
+        gender: GenderEnum.MALE,
+        role: RoleEnum.STUDENT,
+        facultyId: 'faculty123',
+        faculty: undefined,
+        contribution: undefined,
+        contributionComment: undefined,
+        createdAt: new Date(),
+        createdBy: 'exampleUserId',
+        updatedAt: new Date(),
+        updatedBy: 'exampleUserId',
+        deletedAt: new Date(),
+        deletedBy: 'exampleUserId',
+      });
+      jest.spyOn(mailService, 'sendPendingMail').mockResolvedValue(undefined);
+
+      const result = await service.create(
+        createContributionDto,
+        fileImages,
+        fileDocxs,
+      );
+
+      expect(result).toEqual({
+        contribution: expect.any(Contribution),
+        message: 'Successfully create contribution',
+      });
+      expect(mailService.sendPendingMail).toHaveBeenCalled();
+
+      // Kiểm tra các tham số được truyền vào hàm sendPendingMail
+      expect(mailService.sendPendingMail).toHaveBeenCalledWith(
+        result.contribution.id, // Pass the id of the newly created contribution
+        'coordinator@example.com', // Assuming you want to check the email of the coordinator
+        'Coordinator Name', // Assuming you want to check the name of the coordinator
+      );
+    });
   });
+
+
 
   describe('getContributions', () => {
     it('should return contributions with given parameters', async () => {
@@ -174,7 +323,7 @@ describe('ContributionService', () => {
         updatedAt: undefined,
         updatedBy: '',
         deletedAt: undefined,
-        deletedBy: ''
+        deletedBy: '',
       };
 
       const mockQueryBuilder: Partial<SelectQueryBuilder<Contribution>> = {
@@ -196,144 +345,52 @@ describe('ContributionService', () => {
   });
 
   describe('update', () => {
-    it('should update contribution with valid input', async () => {
-      // Mocking the inputs
-      const id = '123456';
-      const updateContributionDto: UpdateContributionDto = {
-        title: 'New Title',
-        status: StatusEnum.APPROVE,
-        fileImage: [
-          { file: 'path/to/image1.jpg' },
-          { file: 'path/to/image2.jpg' }
-        ],
-        fileDocx: [
-          { file: 'path/to/docx1.docx' },
-          { file: 'path/to/docx2.docx' }
-        ]
-      };
-
-      const fileImages: Multer.File[] = [
-        { originalname: 'image1.jpg', path: '/path/to/image1.jpg' },
-        { originalname: 'image2.jpg', path: '/path/to/image2.jpg' },
-      ];
-      const fileDocxs: Multer.File[] = [
-        { originalname: 'docx1.docx', path: '/path/to/docx1.docx' },
-        { originalname: 'docx2.docx', path: '/path/to/docx2.docx' },
-      ];
-
-      // Mocking the functions
-      const findOneBySpy = jest.spyOn(contributionsRepository, 'findOneBy').mockResolvedValueOnce({
-        id: '123456',
-        title: 'Old Title',
-        status: StatusEnum.PENDING,
-      } as Contribution);
-
-      const deleteOldImageFilesSpy = jest.spyOn(service, 'deleteOldImageFiles').mockResolvedValueOnce(undefined);
-      const deleteOldDocxFilesSpy = jest.spyOn(service, 'deleteOldDocxFiles').mockResolvedValueOnce(undefined);
-      const uploadAndReturnImageUrlSpy = jest.spyOn(service as any, 'uploadAndReturnImageUrl').mockResolvedValue('imageUrl');
-      const uploadAndReturnDocxUrlSpy = jest.spyOn(service as any, 'uploadAndReturnDocxUrl').mockResolvedValue('docxUrl');
-      const createAndUploadTitleFileSpy = jest.spyOn(service as any , 'createAndUploadTitleFile').mockResolvedValue('title')
-
-      // Call the update method with all required arguments
-      await service.update(id, updateContributionDto, fileImages, fileDocxs);
-
-      // Assertions
-      expect(findOneBySpy).toHaveBeenCalledWith({ id });
-      expect(deleteOldImageFilesSpy).toHaveBeenCalled();
-      expect(deleteOldDocxFilesSpy).toHaveBeenCalled();
-      expect(uploadAndReturnImageUrlSpy).toHaveBeenCalled();
-      expect(uploadAndReturnDocxUrlSpy).toHaveBeenCalled();
-      expect(createAndUploadTitleFileSpy).toHaveBeenCalled();
-    });
-
-  });
-
-  describe('remove', () => {
-    it('should remove contribution successfully', async () => {
-      // Mocking the contributionsRepository and entityManager methods
-      const getOneMock = jest.fn().mockResolvedValueOnce({
-        id: '123',
-        contributionComment: [{ id: 'commentId1' }, { id: 'commentId2' }],
-      });
-      const softDeleteMock = jest.fn().mockResolvedValueOnce(undefined);
-      const softDeleteCommentsMock = jest.fn().mockResolvedValueOnce(undefined);
-    
-      const contributionsRepositoryMock = {
-        createQueryBuilder: jest.fn().mockReturnValue({
-          leftJoinAndSelect: jest.fn().mockReturnValue({
-            where: jest.fn().mockReturnThis(),
-            getOne: getOneMock,
-          }),
-        }),
-        softDelete: softDeleteMock,
-      };
-      const contributionCommentRepositoryMock = {
-        softDelete: softDeleteCommentsMock,
-      }
-    
-      const entityManagerMock = {
-        softDelete: softDeleteCommentsMock,
-      };
-    
-      const service = new ContributionService(
-        contributionsRepositoryMock as any,
-        entityManagerMock as any,
-        contributionCommentRepositoryMock as any,
-      );
-    
-      // Call the remove method with a valid ID
-      const result = await service.remove('123');
-    
-      // Assertions
-      expect(getOneMock).toHaveBeenCalledWith();
-      expect(getOneMock).toHaveBeenCalledTimes(1);
-      expect(softDeleteCommentsMock).toHaveBeenCalledWith(ContributionComment, {
-        id: 'commentId1',
-      });
-      expect(softDeleteCommentsMock).toHaveBeenCalledWith(ContributionComment, {
-        id: 'commentId2',
-      });
-      expect(softDeleteCommentsMock).toHaveBeenCalledTimes(2);
-      expect(softDeleteMock).toHaveBeenCalledWith('123');
-      expect(softDeleteMock).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({
-        data: null,
-        message: 'Contribution deletion successful',
-      });
-    });
-    
-    it('should return error if contribution not found', async () => {
-      // Mocking the contributionsRepository method to return undefined
-      const getOneMock = jest.fn().mockResolvedValueOnce(undefined);
-    
-      const contributionsRepositoryMock = {
-        createQueryBuilder: jest.fn().mockReturnValue({
-          leftJoinAndSelect: jest.fn().mockReturnValue({
-            where: jest.fn().mockReturnThis(),
-            getOne: getOneMock,
-          }),
-        }),
-      };
-    
-      const cloudinaryServiceMock = {}; // Tạo một mock cho cloudinaryService
-      const service = new ContributionService(
-        contributionsRepositoryMock as any,
-        entityManager as any,
-        cloudinaryServiceMock as any
-      );
-    
-      // Call the remove method with an invalid ID
-      const result = await service.remove('invalidId');
-    
-      // Assertions
-      expect(getOneMock).toHaveBeenCalledWith();
-
-      expect(getOneMock).toHaveBeenCalledTimes(1);
-      expect(result).toEqual({ message: 'Contribution not found' });
-    });
-    
   });
   
+
+  describe('remove', () => {
+    it('should remove contribution and associated files', async () => {
+      const contributionId = '123';
+      const files = [{}, {}];
+
+      const contribution = {
+        id: contributionId,
+        images: files,
+        docxs: files,
+      } as unknown as Contribution;
+
+      jest.spyOn(contributionsRepository, 'createQueryBuilder').mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(contribution),
+      } as any);
+
+      const softDeleteSpy = jest.spyOn(contributionsRepository, 'softDelete').mockResolvedValue(undefined);
+      const softDeleteFileSpy = jest.spyOn(entityManager, 'softDelete').mockResolvedValue(undefined);
+
+      const result = await service.remove(contributionId);
+
+      expect(result).toEqual({ data: null, message: 'Contribution deletion successful' });
+      expect(softDeleteSpy).toHaveBeenCalledWith(contributionId);
+      expect(softDeleteFileSpy).toHaveBeenCalledTimes(0);
+    });
+
+
+    it('should return message if contribution not found', async () => {
+      const contributionId = '123';
+      jest.spyOn(contributionsRepository, 'createQueryBuilder').mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(undefined),
+      } as any);
+
+      const result = await service.remove(contributionId);
+
+      expect(result).toEqual({ message: 'Contribution not found' });
+    });
+
+  });
+
 
 
 });

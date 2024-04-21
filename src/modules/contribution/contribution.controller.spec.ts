@@ -14,6 +14,13 @@ import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { Response } from 'express';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { Multer } from 'multer';
+import { MailService } from '../mail/mail.service';
+import { UserService } from '../user/user.service';
+import { FacultyService } from '../faculty/faculty.service';
+import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
+import { User } from '../../entities/user.entity';
+import { Faculty } from '../../entities/faculty.entity';
 
 // import { Faculty } from 'src/entities/faculty.entity';
 
@@ -22,7 +29,14 @@ describe('ContributionController', () => {
   let service: ContributionService;
   let entityManager: EntityManager;
   let contributionsRepository: Repository<Contribution>;
+  let userRepository: Repository<User>;
+  let facultyRepository: Repository<Faculty>;
   let jwtService: JwtService;
+  let mailService: MailService;
+  let userService: UserService;
+  let facultyService: FacultyService;
+  let mailerSerivce: MailerService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,15 +60,41 @@ describe('ContributionController', () => {
             verify: jest.fn(),
           },
         },
-        CloudinaryService
+        {
+          provide: getRepositoryToken(User),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Faculty),
+          useClass: Repository,
+        },
+        {
+          provide: MailerService,
+          useValue: {
+            sendMail: jest.fn(),
+          },
+        },
+        CloudinaryService,
+        UserService,
+        FacultyService,
+        MailService,
+        ConfigService,
       ],
     }).compile();
-
+  
     controller = module.get<ContributionController>(ContributionController);
     service = module.get<ContributionService>(ContributionService);
     entityManager = module.get<EntityManager>(EntityManager);
     contributionsRepository = module.get<Repository<Contribution>>(
-      getRepositoryToken(Contribution),)
+      getRepositoryToken(Contribution),
+    );
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    facultyRepository = module.get<Repository<Faculty>>(getRepositoryToken(Faculty));
+    jwtService = module.get<JwtService>(JwtService);
+    mailService = module.get<MailService>(MailService);
+    userService = module.get<UserService>(UserService);
+    facultyService = module.get<FacultyService>(FacultyService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('should be defined', () => {
@@ -67,7 +107,8 @@ describe('ContributionController', () => {
         title: 'abcd',
         fileImage: [],
         fileDocx: [],
-        status: StatusEnum.PENDING
+        status: StatusEnum.PENDING,
+        studentId: ''
       };
       const expectedResult = {
         contribution: {
