@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContributionComment } from '../../entities/contributionComment.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { CreateContributionCommentDto } from './dto/create-contributionComment.dto';
-import { GetContributionCommentParams } from './dto/getList-contributionComment.dto';
+import { CreateContributionCommentDto } from '../comtributionComment/dto/create-contributionComment.dto';
+import { GetContributionCommentParams } from '../comtributionComment/dto/getList-contributionComment.dto';
 import { Order } from '../../common/enum/enum';
 import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
-import { UpdateContributionCommentDto } from './dto/update-contributionComment.dto';
+import { UpdateContributionCommentDto } from '../comtributionComment/dto/update-contributionComment.dto';
 
 @Injectable()
 export class ContributionCommentService {
