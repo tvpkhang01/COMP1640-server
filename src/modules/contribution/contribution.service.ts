@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contribution } from '../../entities/contribution.entity';
 import { Brackets, EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
-import { Order, StatusEnum } from 'src/common/enum/enum';
-import { PageMetaDto } from 'src/common/dtos/pageMeta';
-import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
-import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { Order, StatusEnum } from '../../common/enum/enum';
+import { PageMetaDto } from '../../common/dtos/pageMeta';
+import { ResponsePaginate } from '../../common/dtos/responsePaginate';
+import { ContributionComment } from '../../entities/contributionComment.entity';
 import { Multer } from 'multer';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import JSZip from 'jszip';
@@ -89,7 +89,7 @@ export class ContributionService {
     return { contribution, message: 'Successfully create contribution' };
   }
 
-  private async uploadAndReturnImageUrl(file: Multer.File): Promise<string> {
+  async uploadAndReturnImageUrl(file: Multer.File): Promise<string> {
     try {
       const result = await this.cloudinaryService.uploadImageFile(file);
       return result.secure_url;
@@ -99,7 +99,7 @@ export class ContributionService {
     }
   }
 
-  private async uploadAndReturnDocxUrl(file: Multer.File): Promise<string> {
+  async uploadAndReturnDocxUrl(file: Multer.File): Promise<string> {
     try {
       const result = await this.cloudinaryService.uploadDocxFile(file);
       return result.secure_url;
@@ -268,30 +268,80 @@ export class ContributionService {
         return { message: 'Contribution not found' };
       }
 
-      if (fileImages && fileImages.length > 0) {
-        await this.deleteOldImageFiles(contribution);
-        const imageUrls = await Promise.all(
-          fileImages.map(async (file) => {
-            const imageUrl = await this.uploadAndReturnImageUrl(file);
-            return { file: imageUrl };
-          }),
+      const magazine = await this.magazineService.getMagazineById(
+        contribution.magazineId,
+      );
+      const closeDate = new Date(magazine.closeDate);
+
+      const canAddNew = new Date() > closeDate;
+
+      const semester = await this.semesterService.getSemesterById(
+        magazine.semesterId,
+      );
+      const endDate = new Date(semester.endDate);
+      const canUpdateSemester = new Date() < endDate;
+
+      if (canUpdateSemester) {
+        if (!canAddNew) {
+          if (fileImages && fileImages.length > 0) {
+            await this.deleteOldImageFiles(contribution);
+            const imageUrls = await Promise.all(
+              fileImages.map(async (file) => {
+                const imageUrl = await this.uploadAndReturnImageUrl(file);
+                return { file: imageUrl };
+              }),
+            );
+            contribution.fileImage = imageUrls;
+          }
+
+          if (fileDocxs && fileDocxs.length > 0) {
+            await this.deleteOldDocxFiles(contribution);
+            const docxUrls = await Promise.all(
+              fileDocxs.map(async (file) => {
+                const docxUrl = await this.uploadAndReturnDocxUrl(file);
+                return { file: docxUrl };
+              }),
+            );
+            contribution.fileDocx = docxUrls;
+          }
+        } else {
+          if (fileImages && fileImages.length > 0) {
+            const imageUrls = await Promise.all(
+              fileImages.map(async (file) => {
+                const imageUrl = await this.uploadAndReturnImageUrl(file);
+                return { file: imageUrl };
+              }),
+            );
+            if (!contribution.fileImage) {
+              contribution.fileImage = imageUrls;
+            } else {
+              contribution.fileImage = [
+                ...contribution.fileImage,
+                ...imageUrls,
+              ];
+            }
+          }
+
+          if (fileDocxs && fileDocxs.length > 0) {
+            const docxUrls = await Promise.all(
+              fileDocxs.map(async (file) => {
+                const docxUrl = await this.uploadAndReturnDocxUrl(file);
+                return { file: docxUrl };
+              }),
+            );
+            if (!contribution.fileDocx) {
+              contribution.fileDocx = docxUrls;
+            } else {
+              contribution.fileDocx = [...contribution.fileDocx, ...docxUrls];
+            }
+          }
+        }
+      } else {
+        throw new HttpException(
+          'Semester is closed',
+          HttpStatus.METHOD_NOT_ALLOWED,
         );
-
-        contribution.fileImage = imageUrls;
       }
-
-      if (fileDocxs && fileDocxs.length > 0) {
-        await this.deleteOldDocxFiles(contribution);
-        const docxUrls = await Promise.all(
-          fileDocxs.map(async (file) => {
-            const docxUrl = await this.uploadAndReturnDocxUrl(file);
-            return { file: docxUrl };
-          }),
-        );
-
-        contribution.fileDocx = docxUrls;
-      }
-
       if (
         updateContributionDto.title &&
         updateContributionDto.title !== contribution.title
@@ -302,7 +352,6 @@ export class ContributionService {
         const fileTitleObject = { file: fileTitleUrl };
         contribution.fileTitle = [fileTitleObject];
       }
-
       contribution.title = updateContributionDto.title;
       contribution.status = updateContributionDto.status;
       await this.entityManager.save(contribution);
@@ -356,7 +405,10 @@ export class ContributionService {
     if (!contribution) {
       return { message: 'Contribution not found' };
     }
-    if (contribution.contributionComment.length > 0) {
+    if (
+      contribution.contributionComment &&
+      contribution.contributionComment.length > 0
+    ) {
       for (const contributionComment of contribution.contributionComment) {
         await this.entityManager.softDelete(ContributionComment, {
           id: contributionComment.id,
@@ -389,7 +441,7 @@ export class ContributionService {
     }
   }
 
-  private async createAndUploadTitleFile(title: string): Promise<string> {
+  async createAndUploadTitleFile(title: string): Promise<string> {
     const extension = '.txt';
 
     if (extension === '.txt') {

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { ContributionComment } from '../../entities/contributionComment.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateContributionCommentDto } from './dto/create-contributionComment.dto';
 import { GetContributionCommentParams } from './dto/getList-contributionComment.dto';
-import { Order } from 'src/common/enum/enum';
-import { PageMetaDto } from 'src/common/dtos/pageMeta';
-import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
+import { Order } from '../../common/enum/enum';
+import { PageMetaDto } from '../../common/dtos/pageMeta';
+import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { UpdateContributionCommentDto } from './dto/update-contributionComment.dto';
 
 @Injectable()
@@ -51,15 +51,21 @@ export class ContributionCommentService {
     return contributionComment;
   }
   async create(createContributionCommentDto: CreateContributionCommentDto) {
-    const contributionComment = new ContributionComment(
-      createContributionCommentDto,
-    );
-    await this.entityManager.save(contributionComment);
-    return {
-      contributionComment,
-      message: 'Successfully create contributionComment',
-    };
+    try {
+      const contributionComment = new ContributionComment(
+        createContributionCommentDto,
+      );
+      const savedComment = await this.entityManager.save(contributionComment);
+      return {
+        contributionComment: savedComment,
+        message: 'Successfully create contributionComment',
+      };
+    } catch (error) {
+      console.error('Error creating contribution comment:', error);
+      throw error; // Re-throw the error to fail the test
+    }
   }
+
   async update(
     id: string,
     updateContributionCommentDto: UpdateContributionCommentDto,

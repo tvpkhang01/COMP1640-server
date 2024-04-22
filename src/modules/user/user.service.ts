@@ -117,14 +117,14 @@ export class UserService {
     if (!user) {
       return { message: 'User not found' };
     }
-    if (user.contribution.length > 0) {
+    if (user.contribution && user.contribution.length > 0) {
       for (const contribution of user.contribution) {
         await this.entityManager.softDelete(Contribution, {
           id: contribution.id,
         });
       }
     }
-    if (user.contributionComment.length > 0) {
+    if (user.contributionComment && user.contributionComment.length > 0) {
       for (const contributionComment of user.contributionComment) {
         await this.entityManager.softDelete(ContributionComment, {
           id: contributionComment.id,
@@ -144,7 +144,7 @@ export class UserService {
     }
   }
 
-  private async uploadAndReturnUrl(file: Multer.File): Promise<string> {
+  async uploadAndReturnUrl(file: Multer.File): Promise<string> {
     try {
       const result = await this.cloudinaryService.uploadImageFile(file);
       return result.secure_url;

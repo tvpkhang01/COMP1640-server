@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateFacultyDto } from './dto/update-faculty.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Faculty } from 'src/entities/faculty.entity';
+import { Faculty } from '../../entities/faculty.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetFacultyParams } from './dto/getList_faculty.dto';
-import { Order } from 'src/common/enum/enum';
-import { PageMetaDto } from 'src/common/dtos/pageMeta';
-import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
-import { User } from 'src/entities/user.entity';
+import { Order } from '../../common/enum/enum';
+import { PageMetaDto } from '../../common/dtos/pageMeta';
+import { ResponsePaginate } from '../../common/dtos/responsePaginate';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
 export class FacultyService {
