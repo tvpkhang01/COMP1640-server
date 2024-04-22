@@ -60,6 +60,71 @@ export class UserService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
+  async getTotalUser(period: string) {
+    // Đếm tổng số người dùng hiện có
+    const total = await this.usersRepository.count();
+
+    // Tính năm trước
+    const pastYear = new Date();
+    pastYear.setFullYear(pastYear.getFullYear() - 1);
+
+    // Khai báo các biến để lưu trữ số lượng người dùng cũ và hiện tại
+    let oldCount, currentCount;
+
+    // Nếu khoảng thời gian là 'năm'
+    if (period === 'year') {
+      // Đếm số lượng người dùng trong năm trước và năm hiện tại
+      oldCount = await this.usersRepository
+        .createQueryBuilder('user')
+        .where('EXTRACT(YEAR FROM user.createdAt) = :pastYear', {
+          pastYear: pastYear.getFullYear(),
+        })
+        .getCount();
+
+      currentCount = await this.usersRepository
+        .createQueryBuilder('user')
+        .where('EXTRACT(YEAR FROM user.createdAt) = :currentYear', {
+          currentYear: new Date().getFullYear(),
+        })
+        .getCount();
+    } else if (period === 'month') {
+      const currentMonth = new Date().getMonth() + 1;
+      const pastMonth = currentMonth - 1 === 0 ? 12 : currentMonth - 1;
+      const currentYear = new Date().getFullYear();
+      const pastYear = currentMonth - 1 === 0 ? currentYear - 1 : currentYear;
+
+      oldCount = await this.usersRepository
+        .createQueryBuilder('user')
+        .where('EXTRACT(YEAR FROM user.createdAt) = :pastYear', {
+          pastYear: pastYear,
+        })
+        .andWhere('EXTRACT(MONTH FROM user.createdAt) = :pastMonth', {
+          pastMonth: pastMonth,
+        })
+        .getCount();
+
+      currentCount = await this.usersRepository
+        .createQueryBuilder('user')
+        .where('EXTRACT(YEAR FROM user.createdAt) = :currentYear', {
+          currentYear: currentYear,
+        })
+        .andWhere('EXTRACT(MONTH FROM user.createdAt) = :currentMonth', {
+          currentMonth: currentMonth,
+        })
+        .getCount();
+    }
+
+    const percentageUserChange =
+      oldCount === 0 ? 100 : ((currentCount - oldCount) / oldCount) * 100;
+
+    return {
+      total,
+      oldCount,
+      currentCount,
+      percentageUserChange,
+    };
+  }
+
   async getUserById(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
