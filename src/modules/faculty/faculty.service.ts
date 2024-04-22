@@ -16,13 +16,27 @@ export class FacultyService {
     @InjectRepository(Faculty)
     private readonly facultiesRepository: Repository<Faculty>,
     private readonly entityManager: EntityManager,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async create(createFacultyDto: CreateFacultyDto) {
-    const faculty = new Faculty(createFacultyDto);
-    await this.entityManager.save(faculty);
-    return { faculty, message: 'Successfully create faculty' };
-  }
+    try {
+        const faculty = new Faculty(createFacultyDto);
+        const savedFaculty = await this.entityManager.save(faculty);
+        
+        const user = await this.usersRepository.findOne({ where: { id: createFacultyDto.coordinatorId } });
+        if (user) {
+            user.facultyId = savedFaculty.id;
+            await this.entityManager.save(user);
+        }
+
+        return { faculty: savedFaculty, message: 'Successfully create faculty' };
+    } catch (error) {
+        throw error;
+    }
+}
+
 
   async getFaculties(params: GetFacultyParams) {
     const faculties = this.facultiesRepository
