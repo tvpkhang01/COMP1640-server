@@ -1,21 +1,25 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './../../entities/auth.entity';
-import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { GoogleStrategy } from './utils/google.strategy';
-import { SessionSerializer } from './utils/Serializer';
+import { AuthController } from './auth.controller';
+import { UserService } from '../user/user.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Auth } from './entities/auth.entity';
+import { User } from 'src/entities/user.entity';
+import { UserController } from '../user/user.controller';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from './utils/constants';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity])],
-  controllers: [AuthController],
-  providers: [
-    GoogleStrategy,
-    SessionSerializer,
-    {
-      provide: 'AUTH_SERVICE',
-      useClass: AuthService,
-    },
+  imports: [
+    TypeOrmModule.forFeature([Auth, User]),
+    JwtModule.register({
+      global: true,
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '2h' },
+    }),
   ],
+  controllers: [AuthController, UserController],
+  providers: [AuthService, UserService, CloudinaryService],
 })
 export class AuthModule {}
