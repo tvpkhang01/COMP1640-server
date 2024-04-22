@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MagazineService } from './magazine.service';
-import { EntityManager, Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
+import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { Magazine } from '../../entities/magazine.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateMagazineDto } from './dto/create-magazine.dto';
@@ -12,8 +12,6 @@ describe('MagazineService', () => {
   let service: MagazineService;
   let repository: Repository<Magazine>;
   let entityManager: EntityManager;
-  
-  
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,8 +32,7 @@ describe('MagazineService', () => {
 
     service = module.get<MagazineService>(MagazineService);
     entityManager = module.get<EntityManager>(EntityManager);
-    repository = module.get<Repository<Magazine>>(
-    getRepositoryToken(Magazine),)
+    repository = module.get<Repository<Magazine>>(getRepositoryToken(Magazine));
   });
 
   it('should be defined', () => {
@@ -48,16 +45,16 @@ describe('MagazineService', () => {
         magazineName: 'Magazine 1',
         openDate: new Date('2022-01-01'),
         closeDate: new Date('2022-06-30'),
-        semesterId: '123456'
+        semesterId: '123456',
       };
       const expectedResult = {
         magazine: new Magazine(createMagazineDto),
         message: 'Successfully create magazine',
       };
       jest.spyOn(entityManager, 'save').mockResolvedValueOnce(expectedResult);
-  
+
       const result = await service.create(createMagazineDto);
-  
+
       expect(result).toEqual(expectedResult);
     });
   });
@@ -67,29 +64,16 @@ describe('MagazineService', () => {
       const params: GetMagazineParams = {
         skip: 0,
         take: 10,
-        magazineName: "Magazine 1",
+        magazineName: 'Magazine 1',
         openDate: new Date('2022-01-01'),
         closeDate: new Date('2022-06-30'),
         finalCloseDate: new Date('2022-07-30'),
-        semesterId: '123456'
+        semesterId: '123456',
       };
       const pageOptions: PageOptionsDto = new PageOptionsDto();
       pageOptions.page = 1;
       pageOptions.take = 10;
 
-      const skipValue: number = pageOptions.skip;
-
-      const mockQueryBuilder: Partial<SelectQueryBuilder<Magazine>> = {
-        select: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
-      };
-
-      const getManyAndCountSpy = jest.spyOn(repository, 'createQueryBuilder').mockReturnValueOnce(mockQueryBuilder as any);
       const result = await service.getMagazines(params);
       expect(result.data).toEqual([]);
       expect(result.meta.itemCount).toEqual(0);
@@ -100,7 +84,7 @@ describe('MagazineService', () => {
   describe('getMagazineById', () => {
     it('should return magazine with given id', async () => {
       const id = '21341123';
-  
+
       const expectedMagazine: Magazine = {
         id,
         magazineName: 'Magazine 1',
@@ -108,29 +92,33 @@ describe('MagazineService', () => {
         closeDate: new Date('2022-06-30'),
         semesterId: '123456',
         createdAt: undefined,
-        createdBy: "",
+        createdBy: '',
         updatedAt: undefined,
-        updatedBy: "",
+        updatedBy: '',
         deletedAt: undefined,
-        deletedBy: "",
+        deletedBy: '',
         semester: undefined,
-        contribution: []
+        contribution: [],
       };
-  
+
       const mockQueryBuilder: Partial<SelectQueryBuilder<Magazine>> = {
         select: jest.fn().mockReturnThis(),
         leftJoin: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValueOnce(expectedMagazine),
       };
-  
-      const getOneSpy = jest.spyOn(repository, 'createQueryBuilder').mockReturnValueOnce(mockQueryBuilder as any);
-  
+
+      const getOneSpy = jest
+        .spyOn(repository, 'createQueryBuilder')
+        .mockReturnValueOnce(mockQueryBuilder as any);
+
       const result = await service.getMagazineById(id);
-  
+
       expect(result).toEqual(expectedMagazine);
       expect(getOneSpy).toHaveBeenCalledWith('magazine');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('magazine.id = :id', { id });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('magazine.id = :id', {
+        id,
+      });
       expect(mockQueryBuilder.getOne).toHaveBeenCalled();
     });
   });
@@ -145,18 +133,18 @@ describe('MagazineService', () => {
         semesterId: '7890',
       };
 
-      const findOneSpy = jest.spyOn(repository, 'findOneBy').mockResolvedValueOnce(
-        {
+      const findOneSpy = jest
+        .spyOn(repository, 'findOneBy')
+        .mockResolvedValueOnce({
           id: '123456',
           magazineName: 'Old Magazine Name',
           openDate: new Date('2022-01-01'),
           closeDate: new Date('2022-06-30'),
           semesterId: '7890',
-        } as Magazine
-      );
-  
+        } as Magazine);
+
       const result = await service.update(id, updateMagazineDto);
-  
+
       expect(findOneSpy).toHaveBeenCalledWith({ id });
       expect(result).toEqual({
         magazine: {
@@ -174,7 +162,7 @@ describe('MagazineService', () => {
   // describe('remove', () => {
   //   it('should remove an existing magazine', async () => {
   //     // Arrange
-  //     const id = '123456'; 
+  //     const id = '123456';
   //     const findOneByMock = jest.spyOn(repository, 'createQueryBuilder').mockReturnValueOnce({
   //       leftJoinAndSelect: jest.fn().mockReturnThis(),
   //       where: jest.fn().mockReturnThis(),
@@ -187,13 +175,13 @@ describe('MagazineService', () => {
   //         contribution: [{ id: 'contribId1' }, { id: 'contribId2' }] // Mocking contributions
   //       }),
   //     } as any);
-      
+
   //     const softDeleteSpy = jest.spyOn(repository, 'softDelete').mockResolvedValueOnce(expect.any(Object) as UpdateResult);
   //     const softDeleteContributionSpy = jest.spyOn(entityManager, 'softDelete').mockResolvedValueOnce(expect.any(Object) as Promise<UpdateResult>);
-      
+
   //     // Act
   //     await service.remove(id);
-    
+
   //     // Assert
   //     expect(findOneByMock).toHaveBeenCalledWith('magazine');
   //     expect(softDeleteSpy).toHaveBeenCalledWith(id);
@@ -201,6 +189,4 @@ describe('MagazineService', () => {
   //     expect(softDeleteContributionSpy).toHaveBeenCalledWith(entityManager, { id: 'contribId2' });
   //   });
   // });
-  
-  
-})
+});

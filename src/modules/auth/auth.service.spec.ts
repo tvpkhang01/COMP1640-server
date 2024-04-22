@@ -10,7 +10,6 @@ import { User } from '../../entities/user.entity';
 import { AuthController } from './auth.controller';
 import { UserController } from '../user/user.controller';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { jwtConstants } from './utils/constants';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('AuthService', () => {
@@ -148,7 +147,9 @@ describe('AuthService', () => {
       const result = await authService.validateUserFromToken(token);
 
       expect(jwtService.verify).toHaveBeenCalledWith(token);
-      expect(authRepository.findOne).toHaveBeenCalledWith({ where: { id: 'efcea8e9-a2ad-494f-a54c-3145e9329db4' } });
+      expect(authRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'efcea8e9-a2ad-494f-a54c-3145e9329db4' },
+      });
       expect(result).toEqual({});
     });
 

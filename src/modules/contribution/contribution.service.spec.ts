@@ -5,99 +5,37 @@ import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateContributionDto } from './dto/create-contribution.dto';
 import { Multer } from 'multer';
-import { GenderEnum, Order, RoleEnum, StatusEnum } from '../../common/enum/enum';
+import {
+  GenderEnum,
+  Order,
+  RoleEnum,
+  StatusEnum,
+} from '../../common/enum/enum';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { PageOptionsDto } from '../../common/dtos/pageOption';
-import { UpdateContributionDto } from './dto/update-contribution.dto';
-import { ContributionComment } from '../../entities/contributionComment.entity';
 import { UserService } from '../user/user.service';
 import { User } from '../../entities/user.entity';
 import { Faculty } from '../../entities/faculty.entity';
 import { MailService } from '../mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
 import { FacultyService } from '../faculty/faculty.service';
-import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 
 describe('ContributionService', () => {
   let service: ContributionService;
   let entityManager: EntityManager;
   let contributionsRepository: Repository<Contribution>;
-  let userRepository: Repository<User>;
-  let facultyRepository: Repository<Faculty>;
-  let jwtService: JwtService;
   let mailService: MailService;
   let userService: UserService;
   let facultyService: FacultyService;
-  let mailerService: MailerService;
-  let configService: ConfigService;
-
-
-  const createContributionDto: CreateContributionDto = {
-    title: 'Test Contribution',
-    fileImage: [],
-    fileDocx: [],
-    status: StatusEnum.APPROVE,
-    studentId: '1234123',
-  };
-
-  const fileImages: Multer.File[] = [
-    {
-      fieldname: 'imageField',
-      originalname: 'image1.jpg',
-      encoding: '7bit',
-      mimetype: 'image/jpeg',
-      size: 12345,
-      destination: '/path/to/destination',
-      filename: 'image1.jpg',
-      path: '/path/to/destination/image1.jpg',
-      buffer: Buffer.from('...'),
-    },
-    {
-      fieldname: 'imageField',
-      originalname: 'image2.png',
-      encoding: '7bit',
-      mimetype: 'image/png',
-      size: 23456,
-      destination: '/path/to/destination',
-      filename: 'image2.png',
-      path: '/path/to/destination/image2.png',
-      buffer: Buffer.from('...'),
-    },
-  ];
-
-  const fileDocxs: Multer.File[] = [
-    {
-      fieldname: 'docxField',
-      originalname: 'document1.docx',
-      encoding: '7bit',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      size: 12345,
-      destination: '/path/to/destination',
-      filename: 'document1.docx',
-      path: '/path/to/destination/document1.docx',
-      buffer: Buffer.from('...'),
-    },
-    {
-      fieldname: 'docxField',
-      originalname: 'document2.docx',
-      encoding: '7bit',
-      mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      size: 23456,
-      destination: '/path/to/destination',
-      filename: 'document2.docx',
-      path: '/path/to/destination/document2.docx',
-      buffer: Buffer.from('...'),
-    },
-  ];
 
   const mockMailService = {
     sendPendingMail: jest.fn(),
     sendApproveMail: jest.fn(),
     sendRejectMail: jest.fn(),
   };
-
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -137,7 +75,7 @@ describe('ContributionService', () => {
         },
         {
           provide: MailService,
-          useValue: mockMailService
+          useValue: mockMailService,
         },
         CloudinaryService,
         UserService,
@@ -152,14 +90,15 @@ describe('ContributionService', () => {
       getRepositoryToken(Contribution),
     );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    facultyRepository = module.get<Repository<Faculty>>(getRepositoryToken(Faculty));
+    facultyRepository = module.get<Repository<Faculty>>(
+      getRepositoryToken(Faculty),
+    );
     jwtService = module.get<JwtService>(JwtService);
     mailService = module.get<MailService>(MailService);
     userService = module.get<UserService>(UserService);
     facultyService = module.get<FacultyService>(FacultyService);
     configService = module.get<ConfigService>(ConfigService);
     mailerService = module.get<MailerService>(MailerService);
-
   });
 
   it('should be defined', () => {
@@ -173,15 +112,21 @@ describe('ContributionService', () => {
         title: 'example',
         status: StatusEnum.PENDING,
         fileImage: [],
-        fileDocx: []
+        fileDocx: [],
       };
       const fileImages: Multer.File[] = [];
       const fileDocxs: Multer.File[] = [];
 
       // Mock repository methods
-      jest.spyOn(service as any, 'createAndUploadTitleFile').mockResolvedValue('example');
-      jest.spyOn(service as any, 'uploadAndReturnImageUrl').mockResolvedValue('example');
-      jest.spyOn(service as any, 'uploadAndReturnDocxUrl').mockResolvedValue('example');
+      jest
+        .spyOn(service as any, 'createAndUploadTitleFile')
+        .mockResolvedValue('example');
+      jest
+        .spyOn(service as any, 'uploadAndReturnImageUrl')
+        .mockResolvedValue('example');
+      jest
+        .spyOn(service as any, 'uploadAndReturnDocxUrl')
+        .mockResolvedValue('example');
       jest.spyOn(entityManager, 'save').mockResolvedValue(undefined);
       jest.spyOn(userService, 'getUserById').mockResolvedValue({
         id: 'example',
@@ -264,8 +209,6 @@ describe('ContributionService', () => {
     });
   });
 
-
-
   describe('getContributions', () => {
     it('should return contributions with given parameters', async () => {
       const params: GetContributionParams = {
@@ -282,19 +225,6 @@ describe('ContributionService', () => {
       pageOptions.page = 1;
       pageOptions.take = 10;
 
-      const skipValue: number = pageOptions.skip;
-
-      const mockQueryBuilder: Partial<SelectQueryBuilder<Contribution>> = {
-        select: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
-      };
-
-      const getManyAndCountSpy = jest.spyOn(contributionsRepository, 'createQueryBuilder').mockReturnValueOnce(mockQueryBuilder as any);
       const result = await service.getContributions(params);
       expect(result.data).toEqual([]);
       expect(result.meta.itemCount).toEqual(0);
@@ -333,20 +263,23 @@ describe('ContributionService', () => {
         getOne: jest.fn().mockResolvedValueOnce(expectedContribution),
       };
 
-      const getOneSpy = jest.spyOn(contributionsRepository, 'createQueryBuilder').mockReturnValueOnce(mockQueryBuilder as any);
+      const getOneSpy = jest
+        .spyOn(contributionsRepository, 'createQueryBuilder')
+        .mockReturnValueOnce(mockQueryBuilder as any);
 
       const result = await service.getContributionById(id);
 
       expect(result).toEqual(expectedContribution);
       expect(getOneSpy).toHaveBeenCalledWith('contribution');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('contribution.id = :id', { id });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'contribution.id = :id',
+        { id },
+      );
       expect(mockQueryBuilder.getOne).toHaveBeenCalled();
     });
   });
 
-  describe('update', () => {
-  });
-  
+  describe('update', () => {});
 
   describe('remove', () => {
     it('should remove contribution and associated files', async () => {
@@ -359,38 +292,44 @@ describe('ContributionService', () => {
         docxs: files,
       } as unknown as Contribution;
 
-      jest.spyOn(contributionsRepository, 'createQueryBuilder').mockReturnValue({
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(contribution),
-      } as any);
+      jest
+        .spyOn(contributionsRepository, 'createQueryBuilder')
+        .mockReturnValue({
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          getOne: jest.fn().mockResolvedValue(contribution),
+        } as any);
 
-      const softDeleteSpy = jest.spyOn(contributionsRepository, 'softDelete').mockResolvedValue(undefined);
-      const softDeleteFileSpy = jest.spyOn(entityManager, 'softDelete').mockResolvedValue(undefined);
+      const softDeleteSpy = jest
+        .spyOn(contributionsRepository, 'softDelete')
+        .mockResolvedValue(undefined);
+      const softDeleteFileSpy = jest
+        .spyOn(entityManager, 'softDelete')
+        .mockResolvedValue(undefined);
 
       const result = await service.remove(contributionId);
 
-      expect(result).toEqual({ data: null, message: 'Contribution deletion successful' });
+      expect(result).toEqual({
+        data: null,
+        message: 'Contribution deletion successful',
+      });
       expect(softDeleteSpy).toHaveBeenCalledWith(contributionId);
       expect(softDeleteFileSpy).toHaveBeenCalledTimes(0);
     });
 
-
     it('should return message if contribution not found', async () => {
       const contributionId = '123';
-      jest.spyOn(contributionsRepository, 'createQueryBuilder').mockReturnValue({
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(undefined),
-      } as any);
+      jest
+        .spyOn(contributionsRepository, 'createQueryBuilder')
+        .mockReturnValue({
+          leftJoinAndSelect: jest.fn().mockReturnThis(),
+          where: jest.fn().mockReturnThis(),
+          getOne: jest.fn().mockResolvedValue(undefined),
+        } as any);
 
       const result = await service.remove(contributionId);
 
       expect(result).toEqual({ message: 'Contribution not found' });
     });
-
   });
-
-
-
 });

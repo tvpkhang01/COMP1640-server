@@ -9,6 +9,7 @@ import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { Magazine } from '../../entities/magazine.entity';
 import { Contribution } from '../../entities/contribution.entity';
+import { ContributionComment } from 'src/entities/contributionComment.entity';
 
 @Injectable()
 export class MagazineService {
@@ -72,24 +73,20 @@ export class MagazineService {
       .leftJoinAndSelect('magazine.contribution', 'contribution')
       .where('magazine.id = :id', { id })
       .getOne();
+
     if (!magazine) {
       return { message: 'Magazine not found' };
     }
+
     if (magazine.contribution.length > 0) {
       for (const contribution of magazine.contribution) {
-        await this.entityManager.softDelete(Contribution, {
-          id: contribution.id,
+        await this.entityManager.softDelete(Contribution, contribution.id);
+        await this.entityManager.softDelete(ContributionComment, {
+          contributionId: contribution.id,
         });
       }
     }
     await this.magazinesRepository.softDelete(id);
     return { data: null, message: 'Magazine deletion successful' };
   }
-  // update(ID: string, updateSemesterDto: UpdateSemesterDto) {
-  //   return `This action updates a #${ID} semester`;
-  // }
-
-  // remove(ID: number) {
-  //   return `This action removes a #${ID} semester`;
-  // }
 }

@@ -14,9 +14,6 @@ import { UpdateSemesterDto } from './dto/update-semester.dto';
 describe('SemesterController', () => {
   let controller: SemesterController;
   let service: SemesterService;
-  let semesterRepository: Repository<Semester>;
-  let entityManager: EntityManager;
-  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,9 +44,9 @@ describe('SemesterController', () => {
     service = module.get<SemesterService>(SemesterService);
     entityManager = module.get<EntityManager>(EntityManager);
     semesterRepository = module.get<Repository<Semester>>(
-      getRepositoryToken(Semester),)
+      getRepositoryToken(Semester),
+    );
   });
-
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
@@ -73,7 +70,7 @@ describe('SemesterController', () => {
         updatedBy: '',
         deletedAt: undefined,
         deletedBy: '',
-        magazine: []
+        magazine: [],
       };
       const expectedResult = {
         semester: semester,
@@ -94,9 +91,9 @@ describe('SemesterController', () => {
         take: 10,
         semesterName: 'Semester 1',
         startDate: new Date('2022-01-01'),
-        endDate: new Date('2022-06-30')
+        endDate: new Date('2022-06-30'),
       };
-  
+
       // Tạo đối tượng Semester tương tự như expectedResult
       const semester: Semester = {
         id: '123',
@@ -109,29 +106,30 @@ describe('SemesterController', () => {
         updatedBy: '',
         deletedAt: undefined,
         deletedBy: '',
-        magazine: []
+        magazine: [],
       };
-  
+
       const expectedResult: ResponsePaginate<Semester> = new ResponsePaginate(
         [semester],
         new PageMetaDto({
           pageOptionsDto: {
-            page: 1, take: 10,
-            skip: 0
-          }, itemCount: 1
+            page: 1,
+            take: 10,
+            skip: 0,
+          },
+          itemCount: 1,
         }),
-        'Success'
+        'Success',
       );
-  
+
       jest.spyOn(service, 'getSemesters').mockResolvedValueOnce(expectedResult);
-  
+
       const result = await controller.findAll(getSemesterParams);
-  
+
       expect(result).toEqual(expectedResult);
     });
-    
   });
-  
+
   describe('findOne', () => {
     it('should return a semester by id', async () => {
       const semester: Semester = {
@@ -145,9 +143,9 @@ describe('SemesterController', () => {
         updatedBy: '',
         deletedAt: undefined,
         deletedBy: '',
-        magazine: []
+        magazine: [],
       };
-  
+
       jest.spyOn(service, 'getSemesterById').mockResolvedValueOnce(semester);
 
       const result = await controller.findOne('1');
@@ -174,16 +172,16 @@ describe('SemesterController', () => {
         updatedBy: '',
         deletedAt: undefined,
         deletedBy: '',
-        magazine: []
+        magazine: [],
       };
-      const result = { 
+      const result = {
         semester: semester,
-        message: 'Successfully update semester' 
+        message: 'Successfully update semester',
       };
       jest.spyOn(service, 'update').mockResolvedValueOnce(result);
-  
+
       const response = await controller.update('1', updateSemesterDto);
-  
+
       expect(response.result).toEqual(result);
     });
   });
@@ -193,14 +191,11 @@ describe('SemesterController', () => {
       const mockId = '1';
       const result = { data: undefined, message: 'Success' };
       jest.spyOn(service, 'remove').mockResolvedValueOnce(result);
-  
+
       const response = await controller.remove(mockId);
-  
+
       expect(service.remove).toHaveBeenCalledWith(mockId);
-      expect(response).toEqual({ data:result.data, message:result.message });
+      expect(response).toEqual({ data: result.data, message: result.message });
     });
   });
-  
 });
-
-

@@ -26,7 +26,7 @@ import { Semester } from '../../entities/semester.entity';
       Contribution,
       ContributionComment,
       Magazine,
-      Semester
+      Semester,
     ]),
   ],
   controllers: [
@@ -42,7 +42,7 @@ import { Semester } from '../../entities/semester.entity';
     ContributionCommentService,
     CloudinaryService,
     MagazineService,
-    SemesterService
+    SemesterService,
   ],
 })
 export class UserModule {}

@@ -17,9 +17,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 describe('UserController', () => {
   let controller: UserController;
   let service: UserService;
-  let entityManager: EntityManager;
-  let userRepository: Repository<User>;
-  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -43,16 +40,14 @@ describe('UserController', () => {
             verify: jest.fn(),
           },
         },
-        CloudinaryService
+        CloudinaryService,
       ],
     }).compile();
 
     controller = module.get<UserController>(UserController);
     service = module.get<UserService>(UserService);
     entityManager = module.get<EntityManager>(EntityManager);
-    userRepository = module.get<Repository<User>>(
-      getRepositoryToken(User),
-    );
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -69,7 +64,7 @@ describe('UserController', () => {
         gender: GenderEnum.MALE,
         phone: '0987654321',
         dateOfBirth: undefined,
-        facultyId: '123'
+        facultyId: '123',
       };
       const user: User = {
         id: '123456',
@@ -91,12 +86,12 @@ describe('UserController', () => {
         faculty: undefined,
         contribution: [],
         contributionComment: [],
-        password: '123456789'
+        password: '123456789',
       };
       const expectedResult = {
         user: user,
         message: 'Success',
-      }
+      };
       jest.spyOn(service, 'create').mockResolvedValueOnce(expectedResult);
 
       const result = await controller.create(createUserDto);
@@ -119,9 +114,9 @@ describe('UserController', () => {
         dateOfBirth: undefined,
         role: RoleEnum.ADMIN,
         facultyId: '123213',
-        avatar: 'abc'
+        avatar: 'abc',
       };
-  
+
       const user: User = {
         id: '123',
         userName: 'John Doe',
@@ -142,27 +137,28 @@ describe('UserController', () => {
         faculty: undefined,
         contribution: [],
         contributionComment: [],
-        password: '123456789'
+        password: '123456789',
       };
-  
+
       const expectedResult: ResponsePaginate<User> = new ResponsePaginate(
         [user],
         new PageMetaDto({
           pageOptionsDto: {
-            page: 1, take: 10,
-            skip: 0
-          }, itemCount: 1
+            page: 1,
+            take: 10,
+            skip: 0,
+          },
+          itemCount: 1,
         }),
-        'Success'
+        'Success',
       );
-  
+
       jest.spyOn(service, 'getUsers').mockResolvedValueOnce(expectedResult);
-  
+
       const result = await controller.findAll(getUserParams);
-  
+
       expect(result).toEqual(expectedResult);
     });
-    
   });
 
   describe('findOne', () => {
@@ -187,9 +183,9 @@ describe('UserController', () => {
         faculty: undefined,
         contribution: [],
         contributionComment: [],
-        password: '123456789'
+        password: '123456789',
       };
-  
+
       jest.spyOn(service, 'getUserById').mockResolvedValueOnce(user);
 
       const result = await controller.findOneById('1');
@@ -203,7 +199,7 @@ describe('UserController', () => {
       const updateUserDto: UpdateUserDto = {
         userName: 'New IT',
         email: 'new.it@example.com',
-        password: '123456789'
+        password: '123456789',
       };
       const user: User = {
         id: '123',
@@ -225,16 +221,16 @@ describe('UserController', () => {
         faculty: undefined,
         contribution: [],
         contributionComment: [],
-        password: '123456789'
+        password: '123456789',
       };
-      const result = { 
+      const result = {
         user: user,
-        message: 'Successfully update user' 
+        message: 'Successfully update user',
       };
       jest.spyOn(service, 'update').mockResolvedValueOnce(result);
-  
+
       const response = await controller.update('1', updateUserDto);
-  
+
       expect(response).toEqual({ result, message: 'Successfully update user' });
     });
   });
@@ -244,13 +240,11 @@ describe('UserController', () => {
       const mockId = '1';
       const result = { data: undefined, message: 'Success' };
       jest.spyOn(service, 'remove').mockResolvedValueOnce(result);
-  
+
       const response = await controller.remove(mockId);
-  
+
       expect(service.remove).toHaveBeenCalledWith(mockId);
-      expect(response).toEqual({ data:result.data, message:result.message });
+      expect(response).toEqual({ data: result.data, message: result.message });
     });
   });
-  
 });
-

@@ -12,6 +12,24 @@ export class PageOptionsDto {
   @IsString()
   searchByUserName?: string = '';
 
+  @IsString()
+  facultyId?: string = '';
+
+  @IsString()
+  magazineId?: string = '';
+
+  @IsString()
+  semesterId?: string = '';
+
+  @IsString()
+  userId?: string = '';
+
+  @IsString()
+  fileImage?: string = '';
+
+  @IsString()
+  fileDocx?: string = '';
+
   @IsEnum(Order)
   @IsOptional()
   order?: Order = Order.DESC;
@@ -29,7 +47,7 @@ export class PageOptionsDto {
   @Min(1)
   @Max(100)
   @IsOptional()
-  take?: number = 6;
+  take?: number = 10;
 
   get skip(): number {
     return (this.page - 1) * this.take;

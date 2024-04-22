@@ -9,6 +9,8 @@ import { Order } from '../../common/enum/enum';
 import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { Magazine } from '../../entities/magazine.entity';
+import { Contribution } from 'src/entities/contribution.entity';
+import { ContributionComment } from 'src/entities/contributionComment.entity';
 
 @Injectable()
 export class SemesterService {
@@ -69,25 +71,26 @@ export class SemesterService {
       .leftJoinAndSelect('semester.magazine', 'magazine')
       .where('semester.id = :id', { id })
       .getOne();
+
     if (!semester) {
-      return { message: 'Semmester not found' };
+      return { message: 'Semester not found' };
     }
+
     if (semester.magazine.length > 0) {
       for (const magazine of semester.magazine) {
-        await this.entityManager.softDelete(Magazine, {
-          id: magazine.id,
-        });
+        for (const contribution of magazine.contribution) {
+          for (const contributionComment of contribution.contributionComment) {
+            await this.entityManager.softDelete(
+              ContributionComment,
+              contributionComment.id,
+            );
+          }
+          await this.entityManager.softDelete(Contribution, contribution.id);
+        }
+        await this.entityManager.softDelete(Magazine, magazine.id);
       }
     }
     await this.semestersRepository.softDelete(id);
     return { data: null, message: 'Semester deletion successful' };
   }
-
-  // update(ID: string, updateSemesterDto: UpdateSemesterDto) {
-  //   return `This action updates a #${ID} semester`;
-  // }
-
-  // remove(ID: number) {
-  //   return `This action removes a #${ID} semester`;
-  // }
 }

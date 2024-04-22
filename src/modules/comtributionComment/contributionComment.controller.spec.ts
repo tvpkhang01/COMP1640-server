@@ -14,10 +14,6 @@ import { PageMetaDto } from '../../common/dtos/pageMeta';
 describe('ContributionCommentController', () => {
   let controller: ContributionCommentController;
   let service: ContributionCommentService;
-  let repository: Repository<ContributionComment>;
-  let entityManager: EntityManager;
-  let jwtService: JwtService;
-
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,11 +40,16 @@ describe('ContributionCommentController', () => {
       ],
     }).compile();
 
-    controller = module.get<ContributionCommentController>(ContributionCommentController);
-    service = module.get<ContributionCommentService>(ContributionCommentService);
+    controller = module.get<ContributionCommentController>(
+      ContributionCommentController,
+    );
+    service = module.get<ContributionCommentService>(
+      ContributionCommentService,
+    );
     entityManager = module.get<EntityManager>(EntityManager);
     repository = module.get<Repository<ContributionComment>>(
-      getRepositoryToken(ContributionComment),)
+      getRepositoryToken(ContributionComment),
+    );
   });
 
   it('should be defined', () => {
@@ -73,9 +74,9 @@ describe('ContributionCommentController', () => {
           updatedBy: '',
           deletedAt: null,
           deletedBy: '',
-          ...dto
+          ...dto,
         },
-        message: 'Successfully create contributionComment'
+        message: 'Successfully create contributionComment',
       };
 
       jest.spyOn(service, 'create').mockResolvedValueOnce(expectedResult);
@@ -96,38 +97,44 @@ describe('ContributionCommentController', () => {
         take: 10,
       };
 
-      const expectedResult: ResponsePaginate<ContributionComment> = new ResponsePaginate(
-        [{
-          id: '1',
-          contributionId: '123',
-          coordinatorId: '456',
-          comment: 'Test comment',
-          contribution: null,
-          coordinator: null,
-          createdAt: null,
-          createdBy: '',
-          updatedAt: null,
-          updatedBy: '',
-          deletedAt: null,
-          deletedBy: '',
-        }],
-        new PageMetaDto({
-          pageOptionsDto: {
-            page: 1, take: 10,
-            skip: 0
-          }, itemCount: 1
-        }),
-        'Success'
-      );
+      const expectedResult: ResponsePaginate<ContributionComment> =
+        new ResponsePaginate(
+          [
+            {
+              id: '1',
+              contributionId: '123',
+              coordinatorId: '456',
+              comment: 'Test comment',
+              contribution: null,
+              coordinator: null,
+              createdAt: null,
+              createdBy: '',
+              updatedAt: null,
+              updatedBy: '',
+              deletedAt: null,
+              deletedBy: '',
+            },
+          ],
+          new PageMetaDto({
+            pageOptionsDto: {
+              page: 1,
+              take: 10,
+              skip: 0,
+            },
+            itemCount: 1,
+          }),
+          'Success',
+        );
 
-      jest.spyOn(service, 'getContributionComments').mockResolvedValueOnce(expectedResult);
+      jest
+        .spyOn(service, 'getContributionComments')
+        .mockResolvedValueOnce(expectedResult);
 
       const result = await controller.findAll(params);
 
       expect(result).toEqual(expectedResult);
     });
   });
-
 
   describe('findOne', () => {
     it('should return a contribution comment by ID', async () => {
@@ -147,7 +154,9 @@ describe('ContributionCommentController', () => {
         deletedBy: '',
       };
 
-      jest.spyOn(service, 'getContributionCommentById').mockResolvedValueOnce(expectedResult);
+      jest
+        .spyOn(service, 'getContributionCommentById')
+        .mockResolvedValueOnce(expectedResult);
 
       const result = await controller.findOne(id);
 
@@ -177,24 +186,27 @@ describe('ContributionCommentController', () => {
           updatedBy: '',
           deletedAt: null,
           deletedBy: '',
-          ...dto
+          ...dto,
         },
-        message: 'Successfully update comment'
+        message: 'Successfully update comment',
       };
 
       jest.spyOn(service, 'update').mockResolvedValueOnce(expectedResult);
 
       const result = await controller.update(id, dto);
 
-      expect(result.result.contributionComment).toEqual(expectedResult.contributionComment);
+      expect(result.result.contributionComment).toEqual(
+        expectedResult.contributionComment,
+      );
     });
   });
-
 
   describe('remove', () => {
     it('should remove an existing contribution comment', async () => {
       const id = '1';
-      const expectedResult = { message: 'Successfully removed contribution comment' }; // Assuming service returns this message
+      const expectedResult = {
+        message: 'Successfully removed contribution comment',
+      }; // Assuming service returns this message
 
       jest.spyOn(service, 'remove').mockResolvedValueOnce(expectedResult);
 
@@ -203,5 +215,4 @@ describe('ContributionCommentController', () => {
       expect(result).toEqual(expectedResult);
     });
   });
-
 });

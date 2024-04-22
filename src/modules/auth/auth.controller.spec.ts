@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { jwtConstants } from './utils/constants';
+import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 import { Auth } from './entities/auth.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -12,8 +11,6 @@ describe('AuthController', () => {
   let controller: AuthController;
   let service: AuthService;
   let jwtService: JwtService;
-  let authRepository: Repository<Auth>;
-  let userService: UserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,7 +44,6 @@ describe('AuthController', () => {
     userService = module.get<UserService>(UserService);
     jwtService = module.get<JwtService>(JwtService);
     authRepository = module.get<Repository<Auth>>(getRepositoryToken(Auth));
-
   });
 
   it('should be defined', () => {
@@ -57,19 +53,27 @@ describe('AuthController', () => {
   describe('signIn', () => {
     it('should return an access token when sign-in succeeds', async () => {
       const mockAccessToken = 'mocked_access_token';
-      jest.spyOn(service, 'signIn').mockResolvedValue({ access_token: mockAccessToken });
+      jest
+        .spyOn(service, 'signIn')
+        .mockResolvedValue({ access_token: mockAccessToken });
       jest.spyOn(jwtService, 'signAsync').mockResolvedValue(mockAccessToken);
 
-      const result = await controller.signIn({ userName: 'testuser', password: 'password' });
+      const result = await controller.signIn({
+        userName: 'testuser',
+        password: 'password',
+      });
 
       expect(result).toEqual({ access_token: mockAccessToken });
     });
 
     it('should throw an error when sign-in fails', async () => {
-      jest.spyOn(service, 'signIn').mockRejectedValue(new Error('Invalid credentials'));
+      jest
+        .spyOn(service, 'signIn')
+        .mockRejectedValue(new Error('Invalid credentials'));
 
-      await expect(controller.signIn({ userName: 'testuser', password: 'wrongpassword' }))
-        .rejects.toThrowError('Invalid credentials');
+      await expect(
+        controller.signIn({ userName: 'testuser', password: 'wrongpassword' }),
+      ).rejects.toThrowError('Invalid credentials');
     });
   });
 });

@@ -7,7 +7,7 @@ import { Contribution } from '../../entities/contribution.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateContributionDto } from './dto/create-contribution.dto';
-import {  StatusEnum } from '../../common/enum/enum';
+import { StatusEnum } from '../../common/enum/enum';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { PageMetaDto } from '../../common/dtos/pageMeta';
@@ -17,7 +17,7 @@ import { Multer } from 'multer';
 import { MailService } from '../mail/mail.service';
 import { UserService } from '../user/user.service';
 import { FacultyService } from '../faculty/faculty.service';
-import { MailerModule, MailerService } from '@nestjs-modules/mailer';
+import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../../entities/user.entity';
 import { Faculty } from '../../entities/faculty.entity';
@@ -27,16 +27,6 @@ import { Faculty } from '../../entities/faculty.entity';
 describe('ContributionController', () => {
   let controller: ContributionController;
   let service: ContributionService;
-  let entityManager: EntityManager;
-  let contributionsRepository: Repository<Contribution>;
-  let userRepository: Repository<User>;
-  let facultyRepository: Repository<Faculty>;
-  let jwtService: JwtService;
-  let mailService: MailService;
-  let userService: UserService;
-  let facultyService: FacultyService;
-  let mailerSerivce: MailerService;
-  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -81,7 +71,7 @@ describe('ContributionController', () => {
         ConfigService,
       ],
     }).compile();
-  
+
     controller = module.get<ContributionController>(ContributionController);
     service = module.get<ContributionService>(ContributionService);
     entityManager = module.get<EntityManager>(EntityManager);
@@ -89,7 +79,9 @@ describe('ContributionController', () => {
       getRepositoryToken(Contribution),
     );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    facultyRepository = module.get<Repository<Faculty>>(getRepositoryToken(Faculty));
+    facultyRepository = module.get<Repository<Faculty>>(
+      getRepositoryToken(Faculty),
+    );
     jwtService = module.get<JwtService>(JwtService);
     mailService = module.get<MailService>(MailService);
     userService = module.get<UserService>(UserService);
@@ -108,7 +100,7 @@ describe('ContributionController', () => {
         fileImage: [],
         fileDocx: [],
         status: StatusEnum.PENDING,
-        studentId: ''
+        studentId: '',
       };
       const expectedResult = {
         contribution: {
@@ -136,14 +128,13 @@ describe('ContributionController', () => {
           //   contribution: '',
           //   contributionComment: '',
           //   createdAt: new Date(),
-          //   createdBy: 'mockUserId', 
-          //   updatedAt: new Date(), 
+          //   createdBy: 'mockUserId',
+          //   updatedAt: new Date(),
           //   updatedBy: 'mockUserId',
-          //   deletedAt: null, 
+          //   deletedAt: null,
           //   deletedBy: '',
 
-
-          // }, 
+          // },
           student: null,
           magazineId: 'mockMagazineId',
           magazine: null,
@@ -175,67 +166,75 @@ describe('ContributionController', () => {
         skip: 0,
         take: 10,
       };
-      const expectedResult: ResponsePaginate<Contribution> = new ResponsePaginate(
-        [{
-          id: '1',
-          title: 'Mock Title',
-          fileImage: [],
-          fileDocx: [],
-          fileTitle: [{ file: 'Mock File Title' }],
-          status: StatusEnum.PENDING,
-          studentId: 'mockStudentId',
-          student: null,
-          magazineId: 'mockMagazineId',
-          magazine: null,
-          contributionComment: [],
-          createdAt: new Date(),
-          createdBy: 'mockUserId',
-          updatedAt: new Date(),
-          updatedBy: 'mockUserId',
-          deletedAt: null,
-          deletedBy: '',
-          
-        }],
-        new PageMetaDto({
-          pageOptionsDto: {
-            page: 1, take: 10,
-            skip: 0
-          }, itemCount: 1
-        }),
-        'Success'
-      )
-      
-      jest.spyOn(service, 'getContributions').mockResolvedValueOnce(expectedResult);
+      const expectedResult: ResponsePaginate<Contribution> =
+        new ResponsePaginate(
+          [
+            {
+              id: '1',
+              title: 'Mock Title',
+              fileImage: [],
+              fileDocx: [],
+              fileTitle: [{ file: 'Mock File Title' }],
+              status: StatusEnum.PENDING,
+              studentId: 'mockStudentId',
+              student: null,
+              magazineId: 'mockMagazineId',
+              magazine: null,
+              contributionComment: [],
+              createdAt: new Date(),
+              createdBy: 'mockUserId',
+              updatedAt: new Date(),
+              updatedBy: 'mockUserId',
+              deletedAt: null,
+              deletedBy: '',
+            },
+          ],
+          new PageMetaDto({
+            pageOptionsDto: {
+              page: 1,
+              take: 10,
+              skip: 0,
+            },
+            itemCount: 1,
+          }),
+          'Success',
+        );
+
+      jest
+        .spyOn(service, 'getContributions')
+        .mockResolvedValueOnce(expectedResult);
 
       const result = await controller.findAll(params);
 
       expect(result).toEqual(expectedResult);
     });
   });
-  
+
   describe('findOne', () => {
     it('should return a contribution with the given id', async () => {
       const mockId = '1';
-      const mockedResult = { 
-      id: '1',
-      title: 'Mock Title',
-      fileImage: [],
-      fileDocx: [],
-      fileTitle: [{ file: 'Mock File Title' }],
-      status: StatusEnum.PENDING,
-      studentId: 'mockStudentId',
-      student: null,
-      magazineId: 'mockMagazineId',
-      magazine: null,
-      contributionComment: [],
-      createdAt: new Date(),
-      createdBy: 'mockUserId',
-      updatedAt: new Date(),
-      updatedBy: 'mockUserId',
-      deletedAt: null,
-      deletedBy: '',
-    };
-      jest.spyOn(service, 'getContributionById').mockResolvedValueOnce(mockedResult);
+      const mockedResult = {
+        id: '1',
+        title: 'Mock Title',
+        fileImage: [],
+        fileDocx: [],
+        fileTitle: [{ file: 'Mock File Title' }],
+        status: StatusEnum.PENDING,
+        studentId: 'mockStudentId',
+        student: null,
+        magazineId: 'mockMagazineId',
+        magazine: null,
+        contributionComment: [],
+        createdAt: new Date(),
+        createdBy: 'mockUserId',
+        updatedAt: new Date(),
+        updatedBy: 'mockUserId',
+        deletedAt: null,
+        deletedBy: '',
+      };
+      jest
+        .spyOn(service, 'getContributionById')
+        .mockResolvedValueOnce(mockedResult);
 
       const result = await controller.findOne(mockId);
 
@@ -243,7 +242,7 @@ describe('ContributionController', () => {
       expect(result).toBe(mockedResult);
     });
   });
-  
+
   describe('downloadAllContributionsAsZip', () => {
     it('should download all contributions as zip file', async () => {
       const mockZipFilePath = 'mock/path/to/zip/file.zip';
@@ -251,9 +250,11 @@ describe('ContributionController', () => {
         download: jest.fn(),
         status: jest.fn().mockReturnThis(),
         send: jest.fn(),
-      }as unknown as Response<any, Record<string, any>>;
+      } as unknown as Response<any, Record<string, any>>;
 
-      jest.spyOn(service, 'downloadAllContributionsAsZip').mockResolvedValueOnce(mockZipFilePath);
+      jest
+        .spyOn(service, 'downloadAllContributionsAsZip')
+        .mockResolvedValueOnce(mockZipFilePath);
 
       await controller.downloadAllContributionsAsZip(mockResponse);
 
@@ -270,7 +271,9 @@ describe('ContributionController', () => {
       } as unknown as Response;
 
       const errorMessage = 'Failed to download all contributions';
-      jest.spyOn(service, 'downloadAllContributionsAsZip').mockRejectedValueOnce(new Error(errorMessage));
+      jest
+        .spyOn(service, 'downloadAllContributionsAsZip')
+        .mockRejectedValueOnce(new Error(errorMessage));
 
       await controller.downloadAllContributionsAsZip(mockResponse);
 
@@ -289,9 +292,14 @@ describe('ContributionController', () => {
         status: jest.fn(),
         send: jest.fn(),
       };
-      jest.spyOn(service, 'downloadContributionFilesAsZip').mockResolvedValueOnce(mockFilePath);
+      jest
+        .spyOn(service, 'downloadContributionFilesAsZip')
+        .mockResolvedValueOnce(mockFilePath);
 
-      await controller.downloadContributionFilesAsZip(mockId, mockResponse as Response);
+      await controller.downloadContributionFilesAsZip(
+        mockId,
+        mockResponse as Response,
+      );
 
       expect(mockResponse.download).toHaveBeenCalledWith(mockFilePath);
       expect(mockResponse.status).not.toHaveBeenCalled();
@@ -306,13 +314,20 @@ describe('ContributionController', () => {
         status: jest.fn().mockReturnThis(),
         send: jest.fn(),
       };
-      jest.spyOn(service, 'downloadContributionFilesAsZip').mockRejectedValueOnce(mockError);
+      jest
+        .spyOn(service, 'downloadContributionFilesAsZip')
+        .mockRejectedValueOnce(mockError);
 
-      await controller.downloadContributionFilesAsZip(mockId, mockResponse as Response);
+      await controller.downloadContributionFilesAsZip(
+        mockId,
+        mockResponse as Response,
+      );
 
       expect(mockResponse.download).not.toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.send).toHaveBeenCalledWith('Failed to download files');
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        'Failed to download files',
+      );
     });
   });
 
@@ -325,9 +340,14 @@ describe('ContributionController', () => {
         status: jest.fn(),
         send: jest.fn(),
       };
-      jest.spyOn(service, 'downloadMultipleContributionsAsZip').mockResolvedValueOnce(mockFileName);
+      jest
+        .spyOn(service, 'downloadMultipleContributionsAsZip')
+        .mockResolvedValueOnce(mockFileName);
 
-      await controller.downloadMultipleContributionsAsZip(mockIds, mockResponse as Response);
+      await controller.downloadMultipleContributionsAsZip(
+        mockIds,
+        mockResponse as Response,
+      );
 
       expect(mockResponse.download).toHaveBeenCalledWith(mockFileName);
       expect(mockResponse.status).not.toHaveBeenCalled();
@@ -342,25 +362,32 @@ describe('ContributionController', () => {
         status: jest.fn().mockReturnThis(),
         send: jest.fn(),
       };
-      jest.spyOn(service, 'downloadMultipleContributionsAsZip').mockRejectedValueOnce(mockError);
+      jest
+        .spyOn(service, 'downloadMultipleContributionsAsZip')
+        .mockRejectedValueOnce(mockError);
 
-      await controller.downloadMultipleContributionsAsZip(mockIds, mockResponse as Response);
+      await controller.downloadMultipleContributionsAsZip(
+        mockIds,
+        mockResponse as Response,
+      );
 
       expect(mockResponse.download).not.toHaveBeenCalled();
       expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.send).toHaveBeenCalledWith( 'Failed to download files');
+      expect(mockResponse.send).toHaveBeenCalledWith(
+        'Failed to download files',
+      );
     });
   });
 
   describe('update', () => {
     it('should update a contribution and return success message', async () => {
       const mockId = '1';
-      const updateDto: UpdateContributionDto = { 
+      const updateDto: UpdateContributionDto = {
         title: 'abcd',
         fileImage: [],
         fileDocx: [],
         status: StatusEnum.APPROVE,
-       };
+      };
       const mockFileImages: Multer.File[] = [
         {
           fieldname: 'imageField',
@@ -390,7 +417,8 @@ describe('ContributionController', () => {
           fieldname: 'docxField',
           originalname: 'document1.docx',
           encoding: '7bit',
-          mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          mimetype:
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           size: 12345,
           destination: '/path/to/destination',
           filename: 'document1.docx',
@@ -401,7 +429,8 @@ describe('ContributionController', () => {
           fieldname: 'docxField',
           originalname: 'document2.docx',
           encoding: '7bit',
-          mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          mimetype:
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           size: 23456,
           destination: '/path/to/destination',
           filename: 'document2.docx',
@@ -409,36 +438,43 @@ describe('ContributionController', () => {
           buffer: Buffer.from('...'),
         },
       ];
-      const mockedResult = { 
+      const mockedResult = {
         result: {
-        id: '1',
-        title: 'Mock Title',
-        fileImage: [],
-        fileDocx: [],
-        fileTitle: [{ file: 'Mock File Title' }],
-        status: StatusEnum.PENDING,
-        studentId: 'mockStudentId',
-        student: null,
-        magazineId: 'mockMagazineId',
-        magazine: null,
-        contributionComment: [],
-        createdAt: new Date(),
-        createdBy: 'mockUserId',
-        updatedAt: new Date(),
-        updatedBy: 'mockUserId',
-        deletedAt: null,
-        deletedBy: '',
+          id: '1',
+          title: 'Mock Title',
+          fileImage: [],
+          fileDocx: [],
+          fileTitle: [{ file: 'Mock File Title' }],
+          status: StatusEnum.PENDING,
+          studentId: 'mockStudentId',
+          student: null,
+          magazineId: 'mockMagazineId',
+          magazine: null,
+          contributionComment: [],
+          createdAt: new Date(),
+          createdBy: 'mockUserId',
+          updatedAt: new Date(),
+          updatedBy: 'mockUserId',
+          deletedAt: null,
+          deletedBy: '',
         },
-        message: 'Successfully update contribution'
+        message: 'Successfully update contribution',
       };
-      
-      jest.spyOn(service, 'update').mockResolvedValueOnce(mockedResult);
-      
-      const result = await controller.update(mockId, updateDto, { fileImage: mockFileImages, fileDocx: mockFileDocxs });
-      
-      expect(service.update).toHaveBeenCalledWith(mockId, updateDto, mockFileImages, mockFileDocxs);
-      expect(result.result.message).toEqual(mockedResult.message);
 
+      jest.spyOn(service, 'update').mockResolvedValueOnce(mockedResult);
+
+      const result = await controller.update(mockId, updateDto, {
+        fileImage: mockFileImages,
+        fileDocx: mockFileDocxs,
+      });
+
+      expect(service.update).toHaveBeenCalledWith(
+        mockId,
+        updateDto,
+        mockFileImages,
+        mockFileDocxs,
+      );
+      expect(result.result.message).toEqual(mockedResult.message);
     });
   });
 
@@ -446,27 +482,30 @@ describe('ContributionController', () => {
     it('should remove a contribution and return success message if successful', async () => {
       const mockId = '1';
       const mockedResult = { data: undefined, message: 'Success' };
-  
-      jest.spyOn(service, 'remove').mockResolvedValueOnce(mockedResult);
-  
-      const result = await controller.remove(mockId);
-  
-      expect(service.remove).toHaveBeenCalledWith(mockId);
-      expect(result).toEqual({ data:mockedResult.data, message:mockedResult.message });
 
+      jest.spyOn(service, 'remove').mockResolvedValueOnce(mockedResult);
+
+      const result = await controller.remove(mockId);
+
+      expect(service.remove).toHaveBeenCalledWith(mockId);
+      expect(result).toEqual({
+        data: mockedResult.data,
+        message: mockedResult.message,
+      });
     });
-  
+
     it('should return a message if removal fails', async () => {
       const mockId = '1';
       const mockedErrorMessage = 'Failed to remove contribution';
-  
-      jest.spyOn(service, 'remove').mockResolvedValueOnce({ message: mockedErrorMessage });
-  
+
+      jest
+        .spyOn(service, 'remove')
+        .mockResolvedValueOnce({ message: mockedErrorMessage });
+
       const result = await controller.remove(mockId);
 
       expect(service.remove).toHaveBeenCalledWith(mockId);
       expect(result.message).toEqual(mockedErrorMessage);
     });
   });
-  
 });

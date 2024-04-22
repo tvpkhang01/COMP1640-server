@@ -14,10 +14,6 @@ import { UpdateFacultyDto } from './dto/update-faculty.dto';
 describe('FacultyController', () => {
   let controller: FacultyController;
   let service: FacultyService;
-  let facultyRepository: Repository<Faculty>;
-  let entityManager: EntityManager;
-  let jwtService: JwtService;
-
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -48,9 +44,9 @@ describe('FacultyController', () => {
     service = module.get<FacultyService>(FacultyService);
     entityManager = module.get<EntityManager>(EntityManager);
     facultyRepository = module.get<Repository<Faculty>>(
-      getRepositoryToken(Faculty),)
+      getRepositoryToken(Faculty),
+    );
   });
-
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
@@ -73,12 +69,12 @@ describe('FacultyController', () => {
         updatedAt: undefined,
         updatedBy: '',
         deletedAt: undefined,
-        deletedBy: ''
+        deletedBy: '',
       };
       const expectedResult = {
         faculty: faculty,
         message: 'Success',
-      }
+      };
       jest.spyOn(service, 'create').mockResolvedValueOnce(expectedResult);
 
       const result = await controller.create(createFacultyDto);
@@ -94,7 +90,7 @@ describe('FacultyController', () => {
         take: 10,
         facultyName: 'IT',
       };
-  
+
       // Tạo đối tượng Faculty tương tự như expectedResult
       const faculty: Faculty = {
         id: '123',
@@ -107,27 +103,28 @@ describe('FacultyController', () => {
         updatedAt: undefined,
         updatedBy: '',
         deletedAt: undefined,
-        deletedBy: ''
+        deletedBy: '',
       };
-  
+
       const expectedResult: ResponsePaginate<Faculty> = new ResponsePaginate(
         [faculty],
         new PageMetaDto({
           pageOptionsDto: {
-            page: 1, take: 10,
-            skip: 0
-          }, itemCount: 1
+            page: 1,
+            take: 10,
+            skip: 0,
+          },
+          itemCount: 1,
         }),
-        'Success'
+        'Success',
       );
-  
+
       jest.spyOn(service, 'getFaculties').mockResolvedValueOnce(expectedResult);
-  
+
       const result = await controller.findAll(getFacultyParams);
-  
+
       expect(result).toEqual(expectedResult);
     });
-    
   });
 
   describe('findOne', () => {
@@ -143,9 +140,9 @@ describe('FacultyController', () => {
         updatedAt: undefined,
         updatedBy: '',
         deletedAt: undefined,
-        deletedBy: ''
+        deletedBy: '',
       };
-  
+
       jest.spyOn(service, 'getFacultyById').mockResolvedValueOnce(faculty);
 
       const result = await controller.findOne('1');
@@ -153,7 +150,7 @@ describe('FacultyController', () => {
       expect(result).toEqual(faculty);
     });
   });
-  
+
   describe('update', () => {
     it('should update a faculty', async () => {
       const updateFacultyDto: UpdateFacultyDto = {
@@ -171,17 +168,20 @@ describe('FacultyController', () => {
         updatedAt: undefined,
         updatedBy: '',
         deletedAt: undefined,
-        deletedBy: ''
+        deletedBy: '',
       };
-      const result = { 
+      const result = {
         faculty: faculty,
-        message: 'Successfully update faculty' 
+        message: 'Successfully update faculty',
       };
       jest.spyOn(service, 'update').mockResolvedValueOnce(result);
-  
+
       const response = await controller.update('1', updateFacultyDto);
-  
-      expect(response).toEqual({ result, message: 'Successfully update faculty' });
+
+      expect(response).toEqual({
+        result,
+        message: 'Successfully update faculty',
+      });
     });
   });
 
@@ -190,12 +190,11 @@ describe('FacultyController', () => {
       const mockId = '1';
       const result = { data: undefined, message: 'Success' };
       jest.spyOn(service, 'remove').mockResolvedValueOnce(result);
-  
+
       const response = await controller.remove(mockId);
-  
+
       expect(service.remove).toHaveBeenCalledWith(mockId);
-      expect(response).toEqual({ data:result.data, message:result.message });
+      expect(response).toEqual({ data: result.data, message: result.message });
     });
   });
-
 });

@@ -14,10 +14,6 @@ import { UpdateMagazineDto } from './dto/update-magazine.dto';
 describe('MagazineController', () => {
   let controller: MagazineController;
   let service: MagazineService;
-  let magazineRepository: Repository<Magazine>;
-  let entityManager: EntityManager;
-  let jwtService: JwtService;
-
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -48,9 +44,9 @@ describe('MagazineController', () => {
     service = module.get<MagazineService>(MagazineService);
     entityManager = module.get<EntityManager>(EntityManager);
     magazineRepository = module.get<Repository<Magazine>>(
-      getRepositoryToken(Magazine),)
+      getRepositoryToken(Magazine),
+    );
   });
-
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
@@ -62,7 +58,7 @@ describe('MagazineController', () => {
         magazineName: 'Magazine 1',
         openDate: new Date('2022-01-01'),
         closeDate: new Date('2022-06-30'),
-        semesterId: '123456'
+        semesterId: '123456',
       };
       const magazine: Magazine = {
         id: '123456',
@@ -77,7 +73,7 @@ describe('MagazineController', () => {
         deletedAt: undefined,
         deletedBy: '',
         semester: undefined,
-        contribution: []
+        contribution: [],
       };
       const expectedResult = {
         magazine: magazine,
@@ -100,9 +96,9 @@ describe('MagazineController', () => {
         openDate: new Date('2022-01-01'),
         closeDate: new Date('2022-06-30'),
         semesterId: '123456',
-        finalCloseDate: new Date('2022-07-30')
+        finalCloseDate: new Date('2022-07-30'),
       };
-  
+
       // Tạo đối tượng Magazine tương tự như expectedResult
       const magazine: Magazine = {
         id: '123',
@@ -117,27 +113,28 @@ describe('MagazineController', () => {
         deletedAt: undefined,
         deletedBy: '',
         semester: undefined,
-        contribution: []
+        contribution: [],
       };
-  
+
       const expectedResult: ResponsePaginate<Magazine> = new ResponsePaginate(
         [magazine],
         new PageMetaDto({
           pageOptionsDto: {
-            page: 1, take: 10,
-            skip: 0
-          }, itemCount: 1
+            page: 1,
+            take: 10,
+            skip: 0,
+          },
+          itemCount: 1,
         }),
-        'Success'
+        'Success',
       );
-  
+
       jest.spyOn(service, 'getMagazines').mockResolvedValueOnce(expectedResult);
-  
+
       const result = await controller.findAll(getMagazineParams);
-  
+
       expect(result).toEqual(expectedResult);
     });
-    
   });
 
   describe('findOne', () => {
@@ -155,9 +152,9 @@ describe('MagazineController', () => {
         deletedAt: undefined,
         deletedBy: '',
         semester: undefined,
-        contribution: []
+        contribution: [],
       };
-  
+
       jest.spyOn(service, 'getMagazineById').mockResolvedValueOnce(magazine);
 
       const result = await controller.findOne('123');
@@ -187,17 +184,20 @@ describe('MagazineController', () => {
         deletedAt: undefined,
         deletedBy: '',
         semester: undefined,
-        contribution: []
+        contribution: [],
       };
       const result = {
         magazine: magazine,
-        message: 'Successfully update magazine'
+        message: 'Successfully update magazine',
       };
       jest.spyOn(service, 'update').mockResolvedValueOnce(result);
 
       const response = await controller.update('1', updateMagazineDto);
 
-      expect(response).toEqual({ result, message: 'Successfully update magazine' });
+      expect(response).toEqual({
+        result,
+        message: 'Successfully update magazine',
+      });
     });
   });
 
@@ -210,7 +210,7 @@ describe('MagazineController', () => {
       const response = await controller.remove(mockId);
 
       expect(service.remove).toHaveBeenCalledWith(mockId);
-      expect(response).toEqual({ data:result.data, message:result.message });
+      expect(response).toEqual({ data: result.data, message: result.message });
     });
   });
 });

@@ -52,7 +52,9 @@ export class ContributionCommentService {
   }
   async create(createContributionCommentDto: CreateContributionCommentDto) {
     try {
-      const contributionComment = new ContributionComment(createContributionCommentDto);
+      const contributionComment = new ContributionComment(
+        createContributionCommentDto,
+      );
       const savedComment = await this.entityManager.save(contributionComment);
       return {
         contributionComment: savedComment,
@@ -63,7 +65,7 @@ export class ContributionCommentService {
       throw error; // Re-throw the error to fail the test
     }
   }
-  
+
   async update(
     id: string,
     updateContributionCommentDto: UpdateContributionCommentDto,

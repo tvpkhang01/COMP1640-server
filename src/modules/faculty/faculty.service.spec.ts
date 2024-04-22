@@ -35,13 +35,14 @@ describe('FacultyService', () => {
     service = module.get<FacultyService>(FacultyService);
     entityManager = module.get<EntityManager>(EntityManager);
     facultyRepository = module.get<Repository<Faculty>>(
-      getRepositoryToken(Faculty),)
+      getRepositoryToken(Faculty),
+    );
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-  
+
   describe('create', () => {
     it('should create a new faculty', async () => {
       const mockCreateFacultyDto: CreateFacultyDto = {
@@ -50,13 +51,15 @@ describe('FacultyService', () => {
       };
       const expectedResult = {
         faculty: new Faculty({
-            coordinatorId: mockCreateFacultyDto.coordinatorId,
-            facultyName: mockCreateFacultyDto.facultyName,
+          coordinatorId: mockCreateFacultyDto.coordinatorId,
+          facultyName: mockCreateFacultyDto.facultyName,
         }),
         message: 'Successfully create faculty',
-    };
-    
-      jest.spyOn(entityManager, 'save').mockResolvedValueOnce(expectedResult.faculty);
+      };
+
+      jest
+        .spyOn(entityManager, 'save')
+        .mockResolvedValueOnce(expectedResult.faculty);
 
       const result = await service.create(mockCreateFacultyDto);
 
@@ -70,32 +73,19 @@ describe('FacultyService', () => {
       const params: GetFacultyParams = {
         skip: 0,
         take: 10,
-        facultyName: "IT",
+        facultyName: 'IT',
       };
       const pageOptions: PageOptionsDto = new PageOptionsDto();
       pageOptions.page = 1;
       pageOptions.take = 10;
 
-      const skipValue: number = pageOptions.skip;
-
-      const mockQueryBuilder: Partial<SelectQueryBuilder<Faculty>> = {
-        select: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([[], 0]),
-      };
-
-      const getManyAndCountSpy = jest.spyOn(facultyRepository, 'createQueryBuilder').mockReturnValueOnce(mockQueryBuilder as any);
       const result = await service.getFaculties(params);
       expect(result.data).toEqual([]);
       expect(result.meta.itemCount).toEqual(0);
       expect(result.message).toBe('Success');
     });
   });
-  
+
   describe('getFacultyById', () => {
     it('should return faculty with given id', async () => {
       const id = '21341123';
@@ -111,7 +101,7 @@ describe('FacultyService', () => {
         updatedAt: undefined,
         updatedBy: '',
         deletedAt: undefined,
-        deletedBy: ''
+        deletedBy: '',
       };
 
       const mockQueryBuilder: Partial<SelectQueryBuilder<Faculty>> = {
@@ -121,13 +111,17 @@ describe('FacultyService', () => {
         getOne: jest.fn().mockResolvedValueOnce(expectedFaculty),
       };
 
-      const getOneSpy = jest.spyOn(facultyRepository, 'createQueryBuilder').mockReturnValueOnce(mockQueryBuilder as any);
+      const getOneSpy = jest
+        .spyOn(facultyRepository, 'createQueryBuilder')
+        .mockReturnValueOnce(mockQueryBuilder as any);
 
       const result = await service.getFacultyById(id);
 
       expect(result).toEqual(expectedFaculty);
       expect(getOneSpy).toHaveBeenCalledWith('faculty');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('faculty.id = :id', { id });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('faculty.id = :id', {
+        id,
+      });
       expect(mockQueryBuilder.getOne).toHaveBeenCalled();
     });
   });
@@ -140,14 +134,16 @@ describe('FacultyService', () => {
         facultyName: 'New Faculty Name',
         coordinatorId: '789012',
       };
-  
+
       // Mocking the repository findOne and save methods
-      const findOneSpy = jest.spyOn(facultyRepository, 'findOneBy').mockResolvedValueOnce({
-        id: '123456',
-        facultyName: 'Old Faculty Name',
-        coordinatorId: '123456',
-      } as Faculty);
-  
+      const findOneSpy = jest
+        .spyOn(facultyRepository, 'findOneBy')
+        .mockResolvedValueOnce({
+          id: '123456',
+          facultyName: 'Old Faculty Name',
+          coordinatorId: '123456',
+        } as Faculty);
+
       // Mock the returned value of the save method
       // const savedFaculty: Faculty = {
       //   id: '123456',
@@ -163,10 +159,10 @@ describe('FacultyService', () => {
       //   deletedBy: ''
       // };
       // const saveSpy = jest.spyOn(facultyRepository, 'save').mockResolvedValueOnce(savedFaculty);
-  
+
       // Call the update method with all required arguments
       const result = await service.update(id, updateFacultyDto);
-  
+
       // Assertions
       expect(findOneSpy).toHaveBeenCalledWith({ id });
       // expect(saveSpy).toHaveBeenCalled();
@@ -180,7 +176,7 @@ describe('FacultyService', () => {
       });
     });
   });
-  
+
   describe('remove', () => {
     it('should remove faculty successfully', async () => {
       // Mocking the facultiesRepository and entityManager methods
@@ -190,7 +186,7 @@ describe('FacultyService', () => {
       });
       const softDeleteMock = jest.fn().mockResolvedValueOnce(undefined);
       const softDeleteStudentsMock = jest.fn().mockResolvedValueOnce(undefined);
-    
+
       const facultiesRepositoryMock = {
         createQueryBuilder: jest.fn().mockReturnValue({
           leftJoinAndSelect: jest.fn().mockReturnValue({
@@ -202,27 +198,23 @@ describe('FacultyService', () => {
       };
       const studentRepositoryMock = {
         softDelete: softDeleteStudentsMock,
-      }
-    
-      const entityManagerMock = {
-        softDelete: softDeleteStudentsMock,
       };
-    
+
       const service = new FacultyService(
         facultiesRepositoryMock as any,
         studentRepositoryMock as any,
       );
-    
+
       // Call the remove method with a valid ID
       const result = await service.remove('123');
-    
+
       // Assertions
       expect(getOneMock).toHaveBeenCalledWith();
       expect(getOneMock).toHaveBeenCalledTimes(1);
-      expect(softDeleteStudentsMock).toHaveBeenCalledWith( User, {
+      expect(softDeleteStudentsMock).toHaveBeenCalledWith(User, {
         id: 'studentId1',
       });
-      expect(softDeleteStudentsMock).toHaveBeenCalledWith( User, {
+      expect(softDeleteStudentsMock).toHaveBeenCalledWith(User, {
         id: 'studentId2',
       });
       expect(softDeleteStudentsMock).toHaveBeenCalledTimes(2);
@@ -233,11 +225,11 @@ describe('FacultyService', () => {
         message: 'Faculty deletion successful',
       });
     });
-    
+
     it('should return error if faculty not found', async () => {
       // Mocking the facultiesRepository method to return undefined
       const getOneMock = jest.fn().mockResolvedValueOnce(undefined);
-    
+
       const facultiesRepositoryMock = {
         createQueryBuilder: jest.fn().mockReturnValue({
           leftJoinAndSelect: jest.fn().mockReturnValue({
@@ -246,25 +238,21 @@ describe('FacultyService', () => {
           }),
         }),
       };
-    
-      const entityManagerMock = {}; 
+
+      const entityManagerMock = {};
       const service = new FacultyService(
         facultiesRepositoryMock as any,
         entityManagerMock as any,
       );
-    
+
       // Call the remove method with an invalid ID
       const result = await service.remove('invalidId');
-    
+
       // Assertions
       expect(getOneMock).toHaveBeenCalledWith();
-  
+
       expect(getOneMock).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ message: 'Faculty not found' });
     });
-    
   });
-  
-  
-  
 });
