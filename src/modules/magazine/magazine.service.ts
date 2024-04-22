@@ -9,7 +9,7 @@ import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { Magazine } from '../../entities/magazine.entity';
 import { Contribution } from '../../entities/contribution.entity';
-import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { ContributionComment } from '../../entities/contributionComment.entity';
 
 @Injectable()
 export class MagazineService {

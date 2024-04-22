@@ -22,6 +22,10 @@ import { JwtService } from '@nestjs/jwt';
 import { FacultyService } from '../faculty/faculty.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { MagazineService } from '../magazine/magazine.service';
+import { SemesterService } from '../semester/semester.service';
+import { Semester } from '../../entities/semester.entity';
+import { Magazine } from '../../entities/magazine.entity';
 
 describe('ContributionService', () => {
   let service: ContributionService;
@@ -37,13 +41,18 @@ describe('ContributionService', () => {
     sendRejectMail: jest.fn(),
   };
 
+  const mockRepository = {
+    createQueryBuilder: jest.fn(),
+    softDelete: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ContributionService,
         {
           provide: getRepositoryToken(Contribution),
-          useClass: Repository,
+          useValue: mockRepository,
         },
         {
           provide: EntityManager,
@@ -68,6 +77,14 @@ describe('ContributionService', () => {
           useClass: Repository,
         },
         {
+          provide: getRepositoryToken(Semester),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Magazine),
+          useClass: Repository,
+        },
+        {
           provide: MailerService,
           useValue: {
             sendMail: jest.fn(),
@@ -81,6 +98,8 @@ describe('ContributionService', () => {
         UserService,
         FacultyService,
         ConfigService,
+        MagazineService,
+        SemesterService
       ],
     }).compile();
 
@@ -89,16 +108,24 @@ describe('ContributionService', () => {
     contributionsRepository = module.get<Repository<Contribution>>(
       getRepositoryToken(Contribution),
     );
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    facultyRepository = module.get<Repository<Faculty>>(
+    module.get<Repository<User>>(getRepositoryToken(User));
+    module.get<Repository<Faculty>>(
       getRepositoryToken(Faculty),
     );
-    jwtService = module.get<JwtService>(JwtService);
+    module.get<Repository<Semester>>(
+      getRepositoryToken(Semester),
+    );
+    module.get<Repository<Magazine>>(
+      getRepositoryToken(Magazine),
+    );
+    module.get<JwtService>(JwtService);
     mailService = module.get<MailService>(MailService);
     userService = module.get<UserService>(UserService);
     facultyService = module.get<FacultyService>(FacultyService);
-    configService = module.get<ConfigService>(ConfigService);
-    mailerService = module.get<MailerService>(MailerService);
+    module.get<ConfigService>(ConfigService);
+    module.get<MailerService>(MailerService);
+    module.get<MagazineService>(MagazineService);
+    module.get<SemesterService>(SemesterService);
   });
 
   it('should be defined', () => {
@@ -211,26 +238,83 @@ describe('ContributionService', () => {
 
   describe('getContributions', () => {
     it('should return contributions with given parameters', async () => {
+      const contributions: Contribution[] = [
+        {
+          id: "1",
+          title: 'Example Contribution 1',
+          fileImage: [],
+          fileDocx: [],
+          fileTitle: [],
+          status: StatusEnum.APPROVE,
+          studentId: '',
+          student: undefined,
+          magazineId: '',
+          magazine: undefined,
+          contributionComment: [],
+          createdAt: undefined,
+          createdBy: '',
+          updatedAt: undefined,
+          updatedBy: '',
+          deletedAt: undefined,
+          deletedBy: '',
+        },
+        {
+          id: "2",
+          title: 'Example Contribution 2',
+          fileImage: [],
+          fileDocx: [],
+          fileTitle: [],
+          status: StatusEnum.PENDING,
+          studentId: '',
+          student: undefined,
+          magazineId: '',
+          magazine: undefined,
+          contributionComment: [],
+          createdAt: undefined,
+          createdBy: '',
+          updatedAt: undefined,
+          updatedBy: '',
+          deletedAt: undefined,
+          deletedBy: '',
+        },
+      ];
+      const mockQueryBuilder: Partial<SelectQueryBuilder<Contribution>> = {
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([contributions, contributions.length]),
+      };
+
+      const getManyAndCountSpy = jest
+        .spyOn(contributionsRepository, 'createQueryBuilder')
+        .mockReturnValueOnce(mockQueryBuilder as any);
+
+      const statusValues = [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT];
       const params: GetContributionParams = {
-        status: [StatusEnum.APPROVE],
+        status: statusValues ?? [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
         skip: 0,
         take: 10,
         order: Order.ASC,
-        searchByTitle: 'example',
-        searchByUserName: 'user123',
-        title: 'Example Title',
-        filePaths: [{ value: '/path/to/file' }],
+        search: 'example', 
+        facultyId: "1",
+        title: 'abcd',
+        filePaths: [],
       };
-      const pageOptions: PageOptionsDto = new PageOptionsDto();
-      pageOptions.page = 1;
-      pageOptions.take = 10;
 
       const result = await service.getContributions(params);
-      expect(result.data).toEqual([]);
-      expect(result.meta.itemCount).toEqual(0);
-      expect(result.message).toBe('Success');
+
+      expect(getManyAndCountSpy).toHaveBeenCalledWith('contribution');
+      expect(result.data).toEqual(expect.arrayContaining(contributions));
+      expect(result.data.length).toBe(contributions.length); 
+
+      expect(result.meta.itemCount).toBe(contributions.length);
+      expect(result.message).toBe('Success'); 
     });
   });
+  
 
   describe('getContributionById', () => {
     it('should return contribution with given id', async () => {
