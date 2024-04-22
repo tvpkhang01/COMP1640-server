@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { User } from 'src/entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { Order } from 'src/common/constants/enum';
+import { Order } from '../../common/constants/enum';
 import { GetUserParams } from './dto/getList_user.dto';
-import { PageMetaDto } from 'src/common/dtos/pageMeta';
-import { ResponsePaginate } from 'src/common/dtos/responsePaginate';
+import { PageMetaDto } from '../../common/dtos/pageMeta';
+import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Contribution } from 'src/entities/contribution.entity';
-import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { Contribution } from '../../entities/contribution.entity';
+import { ContributionComment } from '../../entities/contributionComment.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Multer } from 'multer';
+import { RoleEnum } from 'src/common/enum/enum';
 
 @Injectable()
 export class UserService {
@@ -38,12 +39,17 @@ export class UserService {
       .createQueryBuilder('user')
       .select(['user', 'faculty'])
       .leftJoin('user.faculty', 'faculty')
+      .andWhere('user.role = ANY(:role)', {
+        role: params.role
+          ? [params.role]
+          : [RoleEnum.ADMIN, RoleEnum.MM, RoleEnum.MC, RoleEnum.STUDENT],
+      })
       .skip(params.skip)
       .take(params.take)
       .orderBy('user.createdAt', Order.DESC);
-    if (params.search) {
+    if (params.searchByUserName) {
       users.andWhere('user.userName ILIKE :userName', {
-        userName: `%${params.search}%`,
+        userName: `%${params.searchByUserName}%`,
       });
     }
     const [result, total] = await users.getManyAndCount();
@@ -57,8 +63,9 @@ export class UserService {
   async getUserById(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .select(['user', 'faculty'])
+      .select(['user', 'faculty', 'contribution'])
       .leftJoin('user.faculty', 'faculty')
+      .leftJoin('user.contribution', 'contribution')
       .where('user.id = :id', { id })
       .getOne();
     return user;
@@ -110,14 +117,14 @@ export class UserService {
     if (!user) {
       return { message: 'User not found' };
     }
-    if (user.contribution.length > 0) {
+    if (user.contribution && user.contribution.length > 0) {
       for (const contribution of user.contribution) {
         await this.entityManager.softDelete(Contribution, {
           id: contribution.id,
         });
       }
     }
-    if (user.contributionComment.length > 0) {
+    if (user.contributionComment && user.contributionComment.length > 0) {
       for (const contributionComment of user.contributionComment) {
         await this.entityManager.softDelete(ContributionComment, {
           id: contributionComment.id,
@@ -137,7 +144,7 @@ export class UserService {
     }
   }
 
-  private async uploadAndReturnUrl(file: Multer.File): Promise<string> {
+  async uploadAndReturnUrl(file: Multer.File): Promise<string> {
     try {
       const result = await this.cloudinaryService.uploadImageFile(file);
       return result.secure_url;

@@ -1,4 +1,4 @@
-import { AbstractEntity } from 'src/common/entities';
+import { AbstractEntity } from '../common/entities/abstract.entity';
 import {
   Column,
   Entity,
@@ -22,9 +22,6 @@ export class ContributionComment extends AbstractEntity {
 
   @Column()
   comment: string;
-
-  @Column()
-  commentDate: Date;
 
   //many to one contribution with contributionComment
   @ManyToOne(
