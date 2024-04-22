@@ -31,6 +31,7 @@
     "@nestjs/mapped-types": "^2.0.5",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/schedule": "^4.0.2",
     "@nestjs/typeorm": "^10.0.2",
     "archiver": "^7.0.1",
     "axios": "^1.6.7",

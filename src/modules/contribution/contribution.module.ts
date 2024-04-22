@@ -20,6 +20,7 @@ import { FacultyController } from '../faculty/faculty.controller';
 import { Semester } from '../../entities/semester.entity';
 import { SemesterService } from '../semester/semester.service';
 import { SemesterController } from '../semester/semester.controller';
+import { AutoDeleteService } from './utils/auto-delete.service';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { SemesterController } from '../semester/semester.controller';
     CloudinaryService,
     MailService,
     SemesterService,
+    AutoDeleteService,
   ],
 })
 export class ContributionModule {}

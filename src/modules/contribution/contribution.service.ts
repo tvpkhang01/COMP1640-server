@@ -3,7 +3,7 @@ import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contribution } from '../../entities/contribution.entity';
-import { Brackets, EntityManager, Repository } from 'typeorm';
+import { Brackets, EntityManager, In, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { Order, StatusEnum } from '../../common/enum/enum';
 import { PageMetaDto } from '../../common/dtos/pageMeta';
@@ -20,6 +20,8 @@ import { MailService } from '../mail/mail.service';
 import { FacultyService } from '../faculty/faculty.service';
 import { Semester } from '../../entities/semester.entity';
 import { Magazine } from '../../entities/magazine.entity';
+import { SemesterService } from '../semester/semester.service';
+import { MagazineService } from '../magazine/magazine.service';
 
 @Injectable()
 export class ContributionService {
@@ -30,6 +32,8 @@ export class ContributionService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly userService: UserService,
     private readonly facultyService: FacultyService,
+    private readonly magazineService: MagazineService,
+    private readonly semesterService: SemesterService,
     private readonly mailService: MailService,
     @InjectRepository(Semester)
     private readonly semesterRepository: Repository<Semester>,
@@ -417,6 +421,24 @@ export class ContributionService {
     }
     await this.contributionsRepository.softDelete(id);
     return { data: null, message: 'Contribution deletion successful' };
+  }
+
+  async deleteOldContributions() {
+    const contributions = await this.contributionsRepository.find({
+      where: {
+        status: In([StatusEnum.PENDING, StatusEnum.REJECT]),
+      },
+    });
+
+    // const currentDate = new Date();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 14); // 14 ngày trước ngày hiện tại
+
+    for (const contribution of contributions) {
+      if (contribution.updatedAt <= cutoffDate) {
+        await this.remove(contribution.id);
+      }
+    }
   }
 
   async deleteOldImageFiles(contribution: Contribution): Promise<void> {

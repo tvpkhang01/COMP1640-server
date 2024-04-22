@@ -17,8 +17,6 @@ import { MagazineService } from '../magazine/magazine.service';
 import { Magazine } from '../../entities/magazine.entity';
 import { SemesterService } from '../semester/semester.service';
 import { Semester } from '../../entities/semester.entity';
-import { Semester } from 'src/entities/semester.entity';
-import { Magazine } from 'src/entities/magazine.entity';
 
 @Module({
   imports: [
