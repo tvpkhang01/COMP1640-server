@@ -1,38 +1,53 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from './../../entities/auth.entity';
-import { UserDetails } from 'src/utils/type';
+// import { CreateAuthDto } from './dto/create-auth.dto';
+// import { UpdateAuthDto } from './dto/update-auth.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Auth } from './entities/auth.entity';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(Auth)
+    private readonly authRepository: Repository<Auth>,
+    private readonly userService: UserService,
+    private jwtService: JwtService,
   ) {}
-
-  async validateUser(details: UserDetails) {
-    console.log('AuthService');
-    console.log(details);
-  
-    if (!details.email) {
-      console.log('User email is missing or null. Cannot create user.');
-      return null;
+  async signIn(userName: string, pass: string): Promise<any> {
+    const user = await this.userService.findOne(userName);
+    if (user?.password !== pass) {
+      throw new UnauthorizedException();
     }
-  
-    const user = await this.userRepository.findOneBy({ email: details.email });
-    console.log(user);
-  
-    if (user) {
-      return user;
-    }
-  
-    console.log('User not found. Creating...');
-    const newUser = this.userRepository.create(details);
-    return this.userRepository.save(newUser);
+    const payload = { sub: user.id, username: user.userName, role: user.role, facultyId: user.facultyId };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
   }
 
-  async findUser(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
-    return user;
+  async validateUserFromToken(token: string): Promise<Auth> {
+    try {
+      const decodedToken = this.jwtService.verify(token);
+
+      if (!decodedToken || !decodedToken.id) {
+        throw new UnauthorizedException('Invalid token');
+      }
+      const user = await this.authRepository.findOne({
+        where: { id: decodedToken.id },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      // Xử lý lỗi decode token
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token');
+      }
+      throw error; // Ném lại lỗi để NestJS xử lý
+    }
   }
 }
