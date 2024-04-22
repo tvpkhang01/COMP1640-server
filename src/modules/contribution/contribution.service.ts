@@ -3,7 +3,7 @@ import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contribution } from '../../entities/contribution.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { Brackets, EntityManager, Repository } from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { Order, StatusEnum } from 'src/common/enum/enum';
 import { PageMetaDto } from 'src/common/dtos/pageMeta';
@@ -18,6 +18,8 @@ import axios from 'axios';
 import { UserService } from '../user/user.service';
 import { MailService } from '../mail/mail.service';
 import { FacultyService } from '../faculty/faculty.service';
+import { Semester } from '../../entities/semester.entity';
+import { Magazine } from '../../entities/magazine.entity';
 
 @Injectable()
 export class ContributionService {
@@ -29,6 +31,10 @@ export class ContributionService {
     private readonly userService: UserService,
     private readonly facultyService: FacultyService,
     private readonly mailService: MailService,
+    @InjectRepository(Semester)
+    private readonly semesterRepository: Repository<Semester>,
+    @InjectRepository(Magazine)
+    private readonly magazineRepository: Repository<Magazine>,
   ) {}
 
   async create(
@@ -120,15 +126,116 @@ export class ContributionService {
         'contribution.createdAt',
         params.order === Order.ASC ? Order.ASC : Order.DESC,
       );
-    if (params.searchByTitle) {
-      contributions.andWhere('contribution.title ILIKE :title', {
-        title: `%${params.searchByTitle}%`,
+    if (params.search) {
+      contributions.andWhere(
+        new Brackets((qb) => {
+          qb.where('contribution.title ILIKE :search', {
+            search: `%${params.search}%`,
+          }).orWhere('student.userName ILIKE :search', {
+            search: `%${params.search}%`,
+          });
+        }),
+      );
+    }
+    if (params.facultyId) {
+      contributions.andWhere('student.facultyId = :facultyId', {
+        facultyId: params.facultyId,
       });
     }
-    if (params.searchByUserName) {
-      contributions.andWhere('student.userName ILIKE :userName', {
-        userName: `%${params.searchByUserName}%`,
+    if (params.magazineId) {
+      contributions.andWhere('magazine.id = :magazineId', {
+        magazineId: params.magazineId,
       });
+    }
+    if (params.semesterId) {
+      contributions.andWhere('magazine.semesterId = :semesterId', {
+        semesterId: params.semesterId,
+      });
+    }
+    if (params.userId) {
+      contributions.andWhere('student.id = :studentId', {
+        userId: params.userId,
+      });
+    }
+    if (params.fileImage === 'notnull') {
+      contributions.andWhere('contribution.fileImage IS NOT NULL');
+    }
+    if (params.fileDocx === 'notnull') {
+      contributions.andWhere('contribution.fileDocx IS NOT NULL');
+    }
+    const [result, total] = await contributions.getManyAndCount();
+    const pageMetaDto = new PageMetaDto({
+      itemCount: total,
+      pageOptionsDto: params,
+    });
+    return new ResponsePaginate(result, pageMetaDto, 'Success');
+  }
+
+  async getContributionsLatestMagazine(params: GetContributionParams) {
+    const latestSemesters = await this.semesterRepository.find({
+      order: { createdAt: 'DESC' },
+      take: 1,
+    });
+    const latestSemester = latestSemesters[0];
+
+    if (!latestSemester) {
+      throw new Error('No semesters available.');
+    }
+
+    const latestMagazines = await this.magazineRepository.find({
+      where: { semesterId: latestSemester.id },
+      order: { createdAt: 'DESC' },
+      take: 1,
+    });
+    const latestMagazine = latestMagazines[0];
+
+    if (!latestMagazine) {
+      throw new Error('No magazines available for the latest semester.');
+    }
+
+    const contributions = this.contributionsRepository
+      .createQueryBuilder('contribution')
+      .select(['contribution', 'student', 'magazine'])
+      .leftJoin('contribution.student', 'student')
+      .leftJoin('contribution.magazine', 'magazine')
+      .where('magazine.id = :magazineId', { magazineId: latestMagazine.id })
+      .andWhere('contribution.status = ANY(:status)', {
+        status: params.status
+          ? [params.status]
+          : [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
+      })
+      .skip(params.skip)
+      .take(params.take)
+      .orderBy(
+        'contribution.createdAt',
+        params.order === Order.ASC ? Order.ASC : Order.DESC,
+      );
+    if (params.facultyId) {
+      contributions.andWhere('student.facultyId = :facultyId', {
+        facultyId: params.facultyId,
+      });
+    }
+    if (params.search) {
+      contributions.andWhere(
+        new Brackets((qb) => {
+          qb.where('contribution.title ILIKE :search', {
+            search: `%${params.search}%`,
+          }).orWhere('student.userName ILIKE :search', {
+            search: `%${params.search}%`,
+          });
+        }),
+      );
+    }
+    if (params.userId) {
+      contributions.andWhere('student.id = :studentId', {
+        userId: params.userId,
+      });
+    }
+    if (params.fileImage === 'notnull') {
+      contributions.andWhere('contribution.fileImage IS NOT NULL');
+    }
+    if (params.fileDocx === 'notnull') {
+      contributions.andWhere('contribution.fileDocx IS NOT NULL');
     }
     const [result, total] = await contributions.getManyAndCount();
     const pageMetaDto = new PageMetaDto({
@@ -141,8 +248,9 @@ export class ContributionService {
   async getContributionById(id: string) {
     const contribution = await this.contributionsRepository
       .createQueryBuilder('contribution')
-      .select(['contribution', 'student'])
+      .select(['contribution', 'student', 'magazine'])
       .leftJoin('contribution.student', 'student')
+      .leftJoin('contribution.magazine', 'magazine')
       .where('contribution.id = :id', { id })
       .getOne();
     return contribution;

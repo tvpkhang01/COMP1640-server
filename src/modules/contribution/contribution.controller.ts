@@ -69,6 +69,11 @@ export class ContributionController {
     return this.contributionService.getContributions(params);
   }
 
+  @Get('contributionLatestMagazine')
+  async findAllLatestMagazine(@Query() params: GetContributionParams) {
+    return this.contributionService.getContributionsLatestMagazine(params);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.contributionService.getContributionById(id);

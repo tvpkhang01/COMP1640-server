@@ -13,6 +13,8 @@ import { ContributionComment } from 'src/entities/contributionComment.entity';
 import { ContributionCommentController } from '../comtributionComment/contributionComment.controller';
 import { ContributionCommentService } from '../comtributionComment/contributionComment.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Semester } from 'src/entities/semester.entity';
+import { Magazine } from 'src/entities/magazine.entity';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
       Faculty,
       Contribution,
       ContributionComment,
+      Semester,
+      Magazine,
     ]),
   ],
   controllers: [

@@ -14,9 +14,12 @@ import { ContributionCommentService } from '../comtributionComment/contributionC
 import { ContributionComment } from 'src/entities/contributionComment.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { FacultyService } from '../faculty/faculty.service';
-import { MailService } from 'src/modules/mail/mail.service';
-import { Faculty } from 'src/entities/faculty.entity';
+import { MailService } from '../mail/mail.service';
+import { Faculty } from '../../entities/faculty.entity';
 import { FacultyController } from '../faculty/faculty.controller';
+import { Semester } from '../../entities/semester.entity';
+import { SemesterService } from '../semester/semester.service';
+import { SemesterController } from '../semester/semester.controller';
 
 @Module({
   imports: [
@@ -26,6 +29,7 @@ import { FacultyController } from '../faculty/faculty.controller';
       Magazine,
       ContributionComment,
       Faculty,
+      Semester,
     ]),
   ],
   controllers: [
@@ -34,6 +38,7 @@ import { FacultyController } from '../faculty/faculty.controller';
     FacultyController,
     MagazineController,
     ContributionCommentController,
+    SemesterController,
   ],
   providers: [
     ContributionService,
@@ -43,6 +48,7 @@ import { FacultyController } from '../faculty/faculty.controller';
     ContributionCommentService,
     CloudinaryService,
     MailService,
+    SemesterService,
   ],
 })
 export class ContributionModule {}

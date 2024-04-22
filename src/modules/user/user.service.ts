@@ -12,6 +12,7 @@ import { Contribution } from '../../entities/contribution.entity';
 import { ContributionComment } from '../../entities/contributionComment.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Multer } from 'multer';
+import { RoleEnum } from 'src/common/enum/enum';
 
 @Injectable()
 export class UserService {
@@ -38,12 +39,17 @@ export class UserService {
       .createQueryBuilder('user')
       .select(['user', 'faculty'])
       .leftJoin('user.faculty', 'faculty')
+      .andWhere('user.role = ANY(:role)', {
+        role: params.role
+          ? [params.role]
+          : [RoleEnum.ADMIN, RoleEnum.MM, RoleEnum.MC, RoleEnum.STUDENT],
+      })
       .skip(params.skip)
       .take(params.take)
       .orderBy('user.createdAt', Order.DESC);
-    if (params.search) {
+    if (params.searchByUserName) {
       users.andWhere('user.userName ILIKE :userName', {
-        userName: `%${params.search}%`,
+        userName: `%${params.searchByUserName}%`,
       });
     }
     const [result, total] = await users.getManyAndCount();
@@ -57,8 +63,9 @@ export class UserService {
   async getUserById(id: string) {
     const user = await this.usersRepository
       .createQueryBuilder('user')
-      .select(['user', 'faculty'])
+      .select(['user', 'faculty', 'contribution'])
       .leftJoin('user.faculty', 'faculty')
+      .leftJoin('user.contribution', 'contribution')
       .where('user.id = :id', { id })
       .getOne();
     return user;
