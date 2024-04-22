@@ -46,8 +46,8 @@ describe('ContributionCommentController', () => {
     service = module.get<ContributionCommentService>(
       ContributionCommentService,
     );
-    entityManager = module.get<EntityManager>(EntityManager);
-    repository = module.get<Repository<ContributionComment>>(
+    module.get<EntityManager>(EntityManager);
+    module.get<Repository<ContributionComment>>(
       getRepositoryToken(ContributionComment),
     );
   });

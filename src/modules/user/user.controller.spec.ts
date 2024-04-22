@@ -46,8 +46,8 @@ describe('UserController', () => {
 
     controller = module.get<UserController>(UserController);
     service = module.get<UserService>(UserService);
-    entityManager = module.get<EntityManager>(EntityManager);
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    module.get<EntityManager>(EntityManager);
+    module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {

@@ -9,8 +9,8 @@ import { Order } from '../../common/enum/enum';
 import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { Magazine } from '../../entities/magazine.entity';
-import { Contribution } from 'src/entities/contribution.entity';
-import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { Contribution } from '../../entities/contribution.entity';
+import { ContributionComment } from '../../entities/contributionComment.entity';
 
 @Injectable()
 export class SemesterService {
@@ -76,7 +76,7 @@ export class SemesterService {
       return { message: 'Semester not found' };
     }
 
-    if (semester.magazine.length > 0) {
+    if (semester.magazine && semester.magazine.length > 0) {
       for (const magazine of semester.magazine) {
         for (const contribution of magazine.contribution) {
           for (const contributionComment of contribution.contributionComment) {

@@ -12,7 +12,7 @@ import { Contribution } from '../../entities/contribution.entity';
 import { ContributionComment } from '../../entities/contributionComment.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Multer } from 'multer';
-import { RoleEnum } from 'src/common/enum/enum';
+import { RoleEnum } from '../../common/enum/enum';
 
 @Injectable()
 export class UserService {
