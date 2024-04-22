@@ -73,6 +73,11 @@ export class ContributionController {
     return this.contributionService.getContributionsLatestMagazine(params);
   }
 
+  @Get('total')
+  async getTotalContribution(@Query('period') period: string) {
+    return await this.contributionService.getTotalContribution(period);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.contributionService.getContributionById(id);

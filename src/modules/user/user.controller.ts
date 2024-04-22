@@ -43,6 +43,11 @@ export class UserController {
     return this.userService.getUsers(params);
   }
 
+  @Get('total')
+  async getTotalUser(@Query('period') period: string) {
+    return await this.userService.getTotalUser(period);
+  }
+
   @Get(':id')
   async findOneById(@Param('id') id: string) {
     return this.userService.getUserById(id);
