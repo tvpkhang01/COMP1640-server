@@ -1,0 +1,8 @@
+node_modules
+vendor
+/public
+/tools
+dist
+docker
+test
+postgresqldata
