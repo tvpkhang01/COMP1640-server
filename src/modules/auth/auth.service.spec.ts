@@ -70,7 +70,7 @@ describe('AuthService', () => {
         avatar: '',
         gender: GenderEnum.MALE,
         role: RoleEnum.STUDENT,
-        facultyId: '',
+        facultyId: 'abcdef',
         faculty: null,
         contribution: [],
         contributionComment: [],
@@ -94,6 +94,7 @@ describe('AuthService', () => {
         sub: 'efcea8e9-a2ad-494f-a54c-3145e9329db4',
         username: 'testuser',
         role: RoleEnum.STUDENT,
+        facultyId: 'abcdef',
       });
       expect(result).toEqual({ access_token: 'mocked_access_token' });
     });
