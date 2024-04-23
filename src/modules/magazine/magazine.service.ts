@@ -9,7 +9,7 @@ import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { Magazine } from '../../entities/magazine.entity';
 import { Contribution } from '../../entities/contribution.entity';
-import { ContributionComment } from 'src/entities/contributionComment.entity';
+import { ContributionComment } from '../../entities/contributionComment.entity';
 
 @Injectable()
 export class MagazineService {
@@ -38,6 +38,69 @@ export class MagazineService {
       pageOptionsDto: params,
     });
     return new ResponsePaginate(result, pageMetaDto, 'Success');
+  }
+  async getTotalMagazine(period: string) {
+    // Đếm tổng số tạp chí hiện có
+    const total = await this.magazinesRepository.count();
+
+    // Tính năm trước
+    const pastYear = new Date();
+    pastYear.setFullYear(pastYear.getFullYear() - 1);
+
+    // Khai báo các biến để lưu trữ số lượng tạp chí cũ và hiện tại
+    let oldCount, currentCount;
+
+    // Nếu khoảng thời gian là 'năm'
+    if (period === 'year') {
+      // Đếm số lượng tạp chí trong năm trước và năm hiện tại
+      oldCount = await this.magazinesRepository
+        .createQueryBuilder('magazine')
+        .where('EXTRACT(YEAR FROM magazine.createdAt) = :pastYear', {
+          pastYear: pastYear.getFullYear(),
+        })
+        .getCount();
+
+      currentCount = await this.magazinesRepository
+        .createQueryBuilder('magazine')
+        .where('EXTRACT(YEAR FROM magazine.createdAt) = :currentYear', {
+          currentYear: new Date().getFullYear(),
+        })
+        .getCount();
+    } else if (period === 'month') {
+      const currentMonth = new Date().getMonth() + 1;
+      const pastMonth = currentMonth - 1 === 0 ? 12 : currentMonth - 1;
+      const currentYear = new Date().getFullYear();
+
+      oldCount = await this.magazinesRepository
+        .createQueryBuilder('magazine')
+        .where('EXTRACT(YEAR FROM magazine.createdAt) = :currentYear', {
+          currentYear: currentYear,
+        })
+        .andWhere('EXTRACT(MONTH FROM magazine.createdAt) = :pastMonth', {
+          pastMonth: pastMonth,
+        })
+        .getCount();
+
+      currentCount = await this.magazinesRepository
+        .createQueryBuilder('magazine')
+        .where('EXTRACT(YEAR FROM magazine.createdAt) = :currentYear', {
+          currentYear: currentYear,
+        })
+        .andWhere('EXTRACT(MONTH FROM magazine.createdAt) = :currentMonth', {
+          currentMonth: currentMonth,
+        })
+        .getCount();
+    }
+
+    const percentageMagazineChange =
+      oldCount === 0 ? 100 : ((currentCount - oldCount) / oldCount) * 100;
+
+    return {
+      total,
+      oldCount,
+      currentCount,
+      percentageMagazineChange,
+    };
   }
   async getMagazineById(id: string) {
     const magazine = await this.magazinesRepository

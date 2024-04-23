@@ -33,6 +33,12 @@ export class FacultyController {
     return this.facultyService.getFaculties(params);
   }
 
+  @Get('/user-statistics')
+  async getFacultyUserStatistics(): Promise<any[]> {
+    // Gọi phương thức trong FacultyService để lấy thông tin về tổng số và phần trăm của user trong mỗi faculty
+    return await this.facultyService.getFacultyUserStatistics();
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.facultyService.getFacultyById(id);

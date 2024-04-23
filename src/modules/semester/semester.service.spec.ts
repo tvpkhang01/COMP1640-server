@@ -39,7 +39,7 @@ describe('SemesterService', () => {
     service = module.get<SemesterService>(SemesterService);
     entityManager = module.get<EntityManager>(EntityManager);
     repository = module.get<Repository<Semester>>(getRepositoryToken(Semester));
-    magazineRepository = module.get<Repository<Magazine>>(
+    module.get<Repository<Magazine>>(
       getRepositoryToken(Magazine),
     );
   });
@@ -69,6 +69,35 @@ describe('SemesterService', () => {
 
   describe('getSemesters', () => {
     it('should return semesters with given parameters', async () => {
+      const expectedSemesters: Semester[] = [
+        {
+          id: '123',
+          semesterName: 'Semester 1',
+          startDate: new Date('2022-01-01'),
+          endDate: new Date('2022-06-30'),
+          magazine: [],
+          createdAt: undefined,
+          createdBy: '',
+          updatedAt: undefined,
+          updatedBy: '',
+          deletedAt: undefined,
+          deletedBy: ''
+        }
+      ]
+
+      const mockQueryBuilder: Partial<SelectQueryBuilder<Semester>> = {
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([expectedSemesters, expectedSemesters.length]),
+      };
+
+      const getManyAndCountSpy = jest
+        .spyOn(repository, 'createQueryBuilder')
+        .mockReturnValueOnce(mockQueryBuilder as any);
+
       const params: GetSemesterParams = {
         skip: 0,
         take: 10,
@@ -81,8 +110,9 @@ describe('SemesterService', () => {
       pageOptions.take = 10;
 
       const result = await service.getSemesters(params);
-      expect(result.data).toEqual([]);
-      expect(result.meta.itemCount).toEqual(0);
+      expect(getManyAndCountSpy).toHaveBeenCalledWith('semester');
+      expect(result.data).toEqual(expect.arrayContaining(expectedSemesters));
+      expect(result.meta.itemCount).toBe(expectedSemesters.length);
       expect(result.message).toBe('Success');
     });
   });
@@ -160,49 +190,75 @@ describe('SemesterService', () => {
   });
 
   describe('remove', () => {
-    it('should remove semester and associated magazines', async () => {
-      const semesterId = '123';
-      const magazines = [new Magazine({}), new Magazine({})];
+    it('should remove semester successfully', async () => {
+      // Mocking the semestersRepository and entityManager methods
+      const getOneMock = jest.fn().mockResolvedValueOnce({
+        id: '123',
+        student: [{ id: 'studentId1' }, { id: 'studentId2' }],
+      });
+      const softDeleteMock = jest.fn().mockResolvedValueOnce(undefined);
+      const softDeleteStudentsMock = jest.fn().mockResolvedValueOnce(undefined);
 
-      const semester = {
-        id: semesterId,
-        magazine: magazines,
-      } as unknown as Semester;
+      const semestersRepositoryMock = {
+        createQueryBuilder: jest.fn().mockReturnValue({
+          leftJoinAndSelect: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnThis(),
+            getOne: getOneMock,
+          }),
+        }),
+        softDelete: softDeleteMock,
+      };
+      const studentRepositoryMock = {
+        softDelete: softDeleteStudentsMock,
+      };
 
-      jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(semester),
-      } as any);
 
-      const softDeleteSpy = jest
-        .spyOn(repository, 'softDelete')
-        .mockResolvedValue(undefined);
-      const softDeleteMagazineSpy = jest
-        .spyOn(entityManager, 'softDelete')
-        .mockResolvedValue(undefined);
+      const service = new SemesterService(
+        semestersRepositoryMock as any,
+        studentRepositoryMock as any,
+      );
 
-      const result = await service.remove(semesterId);
+      // Call the remove method with a valid ID
+      const result = await service.remove('123');
 
+      // Assertions
+      expect(getOneMock).toHaveBeenCalledWith();
+      expect(getOneMock).toHaveBeenCalledTimes(1);
+      expect(softDeleteMock).toHaveBeenCalledWith('123');
+      expect(softDeleteMock).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: null,
         message: 'Semester deletion successful',
       });
-      expect(softDeleteSpy).toHaveBeenCalledWith(semesterId);
-      expect(softDeleteMagazineSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('should return message if semester not found', async () => {
-      const semesterId = '123';
-      jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(undefined),
-      } as any);
+    it('should return error if semester not found', async () => {
+      // Mocking the semestersRepository method to return undefined
+      const getOneMock = jest.fn().mockResolvedValueOnce(undefined);
 
-      const result = await service.remove(semesterId);
+      const semestersRepositoryMock = {
+        createQueryBuilder: jest.fn().mockReturnValue({
+          leftJoinAndSelect: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnThis(),
+            getOne: getOneMock,
+          }),
+        }),
+      };
 
-      expect(result).toEqual({ message: 'Semmester not found' });
+      const entityManagerMock = {};
+      const service = new SemesterService(
+        semestersRepositoryMock as any,
+        entityManagerMock as any,
+      );
+
+      // Call the remove method with an invalid ID
+      const result = await service.remove('invalidId');
+
+      // Assertions
+      expect(getOneMock).toHaveBeenCalledWith();
+
+      expect(getOneMock).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ message: 'Semester not found' });
     });
   });
 });

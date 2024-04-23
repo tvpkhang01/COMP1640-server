@@ -33,6 +33,11 @@ export class MagazineController {
     return this.magazineService.getMagazines(params);
   }
 
+  @Get('total')
+  async getTotalUser(@Query('period') period: string) {
+    return await this.magazineService.getTotalMagazine(period);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.magazineService.getMagazineById(id);

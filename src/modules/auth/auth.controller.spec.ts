@@ -11,6 +11,7 @@ describe('AuthController', () => {
   let controller: AuthController;
   let service: AuthService;
   let jwtService: JwtService;
+  
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,9 +42,9 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController);
     service = module.get<AuthService>(AuthService);
-    userService = module.get<UserService>(UserService);
+    module.get<UserService>(UserService);
     jwtService = module.get<JwtService>(JwtService);
-    authRepository = module.get<Repository<Auth>>(getRepositoryToken(Auth));
+    module.get<Repository<Auth>>(getRepositoryToken(Auth));
   });
 
   it('should be defined', () => {

@@ -10,6 +10,7 @@ import { GetFacultyParams } from './dto/getList_faculty.dto';
 import { ResponsePaginate } from '../../common/dtos/responsePaginate';
 import { PageMetaDto } from '../../common/dtos/pageMeta';
 import { UpdateFacultyDto } from './dto/update-faculty.dto';
+import { User } from '../../entities/user.entity';
 
 describe('FacultyController', () => {
   let controller: FacultyController;
@@ -22,6 +23,10 @@ describe('FacultyController', () => {
         FacultyService,
         {
           provide: getRepositoryToken(Faculty),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(User),
           useClass: Repository,
         },
         {
@@ -42,9 +47,12 @@ describe('FacultyController', () => {
 
     controller = module.get<FacultyController>(FacultyController);
     service = module.get<FacultyService>(FacultyService);
-    entityManager = module.get<EntityManager>(EntityManager);
-    facultyRepository = module.get<Repository<Faculty>>(
+    module.get<EntityManager>(EntityManager);
+    module.get<Repository<Faculty>>(
       getRepositoryToken(Faculty),
+    );
+    module.get<Repository<User>>(
+      getRepositoryToken(User),
     );
   });
 

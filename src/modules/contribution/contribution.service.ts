@@ -249,6 +249,123 @@ export class ContributionService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
+  async getTotalContribution(period: string) {
+    // Đếm tổng số contribution hiện có
+    const total = await this.contributionsRepository.count();
+
+    // Tính năm trước
+    const pastYear = new Date();
+    pastYear.setFullYear(pastYear.getFullYear() - 1);
+
+    // Khai báo các biến để lưu trữ số lượng contribution cũ, hiện tại, số contribution hoàn thành cũ và hiện tại
+    let oldCount, currentCount;
+
+    // Đếm số lượng contribution pending
+    const pendingCount = await this.contributionsRepository
+      .createQueryBuilder('contribution')
+      .where('contribution.status = :status', { status: StatusEnum.PENDING })
+      .getCount();
+
+    // Đếm số lượng contribution đã approve
+    const approveCount = await this.contributionsRepository
+      .createQueryBuilder('contribution')
+      .where('contribution.status = :status', { status: StatusEnum.APPROVE })
+      .getCount();
+
+    // Đếm số lượng contribution đã reject
+    const rejectCount = await this.contributionsRepository
+      .createQueryBuilder('contribution')
+      .where('contribution.status = :status', { status: StatusEnum.REJECT })
+      .getCount();
+
+    // Nếu khoảng thời gian là 'năm'
+    if (period === 'year') {
+      // Đếm số lượng contribution trong năm trước và năm hiện tại
+      oldCount = await this.contributionsRepository
+        .createQueryBuilder('contribution')
+        .where('EXTRACT(YEAR FROM contribution.createdAt) = :pastYear', {
+          pastYear: pastYear.getFullYear(),
+        })
+        .getCount();
+
+      currentCount = await this.contributionsRepository
+        .createQueryBuilder('contribution')
+        .where('EXTRACT(YEAR FROM contribution.createdAt) = :currentYear', {
+          currentYear: new Date().getFullYear(),
+        })
+        .getCount();
+    } else if (period === 'month') {
+      // Nếu khoảng thời gian là 'tháng'
+      const currentMonth = new Date().getMonth() + 1; // Tháng hiện tại
+      const pastMonth = currentMonth - 1 === 0 ? 12 : currentMonth - 1; // Tháng trước, nếu là tháng 1 thì lấy tháng 12 của năm trước
+      const currentYear = new Date().getFullYear();
+
+      // Đếm số lượng contribution trong tháng hiện tại và tháng trước của năm hiện tại
+      oldCount = await this.contributionsRepository
+        .createQueryBuilder('contribution')
+        .where('EXTRACT(YEAR FROM contribution.createdAt) = :currentYear', {
+          currentYear: currentYear,
+        })
+        .andWhere('EXTRACT(MONTH FROM contribution.createdAt) = :pastMonth', {
+          pastMonth: pastMonth,
+        })
+        .getCount();
+
+      currentCount = await this.contributionsRepository
+        .createQueryBuilder('contribution')
+        .where('EXTRACT(YEAR FROM contribution.createdAt) = :currentYear', {
+          currentYear: currentYear,
+        })
+        .andWhere(
+          'EXTRACT(MONTH FROM contribution.createdAt) = :currentMonth',
+          {
+            currentMonth: currentMonth,
+          },
+        )
+        .getCount();
+    } else if (period === 'count_join') {
+      // Nếu khoảng thời gian là 'count_join'
+      const currentYear = new Date().getFullYear();
+      const joinCounts = {};
+
+      // Đếm số lượng contribution được tạo theo từng tháng trong năm hiện tại
+      for (let month = 0; month < 12; month++) {
+        const count = await this.contributionsRepository
+          .createQueryBuilder('contribution')
+          .where('EXTRACT(YEAR FROM contribution.createdAt) = :year', {
+            year: currentYear,
+          })
+          .andWhere('EXTRACT(MONTH FROM contribution.createdAt) = :month', {
+            month: month + 1,
+          })
+          .getCount();
+
+        joinCounts[month + 1] = count;
+      }
+      return joinCounts;
+    }
+
+    // Tính phần trăm thay đổi số lượng contribution và số contribution approve
+    const percentageContributionChange =
+      oldCount === 0 ? 100 : ((currentCount - oldCount) / oldCount) * 100;
+
+    // Tính phần trăm số lượng contribution chờ duyệt, đang tiến hành và đã hoàn thành
+    const pendingPercentage = (pendingCount / total) * 100;
+    const approvePercentage = (approveCount / total) * 100;
+    const rejectPercentage = (rejectCount / total) * 100;
+
+    // Trả về thông tin tổng hợp
+    return {
+      total,
+      oldCount,
+      currentCount,
+      percentageContributionChange,
+      pendingPercentage,
+      approvePercentage,
+      rejectPercentage,
+    };
+  }
+
   async getContributionById(id: string) {
     const contribution = await this.contributionsRepository
       .createQueryBuilder('contribution')
@@ -503,7 +620,7 @@ export class ContributionService {
 
   async downloadAllContributionsAsZip(): Promise<string> {
     const contributionsResponse = await this.getContributions({
-      status: [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
+      status: [StatusEnum.APPROVE],
       skip: 0,
       take: 9999,
       order: Order.ASC,

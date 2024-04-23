@@ -60,10 +60,10 @@ describe('UserService', () => {
     cloudinaryService = module.get<CloudinaryService>(CloudinaryService);
     entityManager = module.get<EntityManager>(EntityManager);
     repository = module.get<Repository<User>>(getRepositoryToken(User));
-    contributionRepository = module.get<Repository<Contribution>>(
+    module.get<Repository<Contribution>>(
       getRepositoryToken(Contribution),
     );
-    contributionCommentRepository = module.get<Repository<ContributionComment>>(
+    module.get<Repository<ContributionComment>>(
       getRepositoryToken(ContributionComment),
     );
   });
@@ -111,27 +111,69 @@ describe('UserService', () => {
 
   describe('getUsers', () => {
     it('should return users with given parameters', async () => {
+      const expectedUsers: User[] = [
+        {
+          id: '123',
+          userName: 'John Doe',
+          role: RoleEnum.STUDENT,
+          password: '123456789',
+          createdAt: undefined,
+          createdBy: '',
+          updatedAt: undefined,
+          updatedBy: '',
+          deletedAt: undefined,
+          deletedBy: '',
+          code: '',
+          phone: '',
+          dateOfBirth: undefined,
+          avatar: '',
+          gender: GenderEnum.MALE,
+          facultyId: '',
+          faculty: null,
+          contribution: [],
+          contributionComment: [],
+          email: ''
+        }
+      ]
+
+      const mockQueryBuilder: Partial<SelectQueryBuilder<User>> = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        andWhere : jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([expectedUsers, expectedUsers.length]),
+        getOne: jest.fn().mockResolvedValue(expectedUsers[0]),
+      };
+
+      const getManyAndCountSpy = jest
+        .spyOn(repository, 'createQueryBuilder')
+        .mockReturnValueOnce(mockQueryBuilder as any);
+
       const params: GetUserParams = {
         skip: 0,
         take: 10,
         userName: 'John Doe',
-        role: RoleEnum.STUDENT,
-        password: '123456789',
-        code: 'abcdef',
-        email: 'john.doe@example.com',
+        password: '',
+        code: '',
+        email: '',
         gender: GenderEnum.MALE,
         hone: '',
         dateOfBirth: undefined,
-        facultyId: '123',
-        avatar: 'abcd',
+        role: RoleEnum.ADMIN,
+        facultyId: '',
+        avatar: ''
       };
       const pageOptions: PageOptionsDto = new PageOptionsDto();
       pageOptions.page = 1;
       pageOptions.take = 10;
 
       const result = await service.getUsers(params);
-      expect(result.data).toEqual([]);
-      expect(result.meta.itemCount).toEqual(0);
+      expect(getManyAndCountSpy).toHaveBeenCalledWith('user');
+      expect(result.data).toEqual(expect.arrayContaining(expectedUsers));
+      expect(result.meta.itemCount).toBe(expectedUsers.length);
       expect(result.message).toBe('Success');
     });
   });
