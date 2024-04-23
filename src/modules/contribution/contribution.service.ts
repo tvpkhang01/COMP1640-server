@@ -620,7 +620,7 @@ export class ContributionService {
 
   async downloadAllContributionsAsZip(): Promise<string> {
     const contributionsResponse = await this.getContributions({
-      status: [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
+      status: [StatusEnum.APPROVE],
       skip: 0,
       take: 9999,
       order: Order.ASC,
