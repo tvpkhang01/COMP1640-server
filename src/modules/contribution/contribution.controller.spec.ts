@@ -21,6 +21,10 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../../entities/user.entity';
 import { Faculty } from '../../entities/faculty.entity';
+import { MagazineService } from '../magazine/magazine.service';
+import { SemesterService } from '../semester/semester.service';
+import { Semester } from '../../entities/semester.entity';
+import { Magazine } from '../../entities/magazine.entity';
 
 // import { Faculty } from 'src/entities/faculty.entity';
 
@@ -59,6 +63,14 @@ describe('ContributionController', () => {
           useClass: Repository,
         },
         {
+          provide: getRepositoryToken(Semester),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Magazine),
+          useClass: Repository,
+        },
+        {
           provide: MailerService,
           useValue: {
             sendMail: jest.fn(),
@@ -69,24 +81,35 @@ describe('ContributionController', () => {
         FacultyService,
         MailService,
         ConfigService,
+        MagazineService,
+        SemesterService
       ],
     }).compile();
 
     controller = module.get<ContributionController>(ContributionController);
     service = module.get<ContributionService>(ContributionService);
-    entityManager = module.get<EntityManager>(EntityManager);
-    contributionsRepository = module.get<Repository<Contribution>>(
+    module.get<EntityManager>(EntityManager);
+    module.get<Repository<Contribution>>(
       getRepositoryToken(Contribution),
     );
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    facultyRepository = module.get<Repository<Faculty>>(
+    module.get<Repository<User>>(getRepositoryToken(User));
+    module.get<Repository<Faculty>>(
       getRepositoryToken(Faculty),
     );
-    jwtService = module.get<JwtService>(JwtService);
-    mailService = module.get<MailService>(MailService);
-    userService = module.get<UserService>(UserService);
-    facultyService = module.get<FacultyService>(FacultyService);
-    configService = module.get<ConfigService>(ConfigService);
+    module.get<Repository<Semester>>(
+      getRepositoryToken(Semester),
+    );
+    module.get<Repository<Magazine>>(
+      getRepositoryToken(Magazine),
+    );
+    module.get<JwtService>(JwtService);
+    module.get<MailService>(MailService);
+    module.get<UserService>(UserService);
+    module.get<FacultyService>(FacultyService);
+    module.get<ConfigService>(ConfigService);
+    module.get<MagazineService>(MagazineService);
+    module.get<SemesterService>(SemesterService);
+
   });
 
   it('should be defined', () => {

@@ -42,8 +42,8 @@ describe('SemesterController', () => {
 
     controller = module.get<SemesterController>(SemesterController);
     service = module.get<SemesterService>(SemesterService);
-    entityManager = module.get<EntityManager>(EntityManager);
-    semesterRepository = module.get<Repository<Semester>>(
+    module.get<EntityManager>(EntityManager);
+    module.get<Repository<Semester>>(
       getRepositoryToken(Semester),
     );
   });

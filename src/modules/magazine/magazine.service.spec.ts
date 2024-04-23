@@ -61,22 +61,54 @@ describe('MagazineService', () => {
 
   describe('getMagazines', () => {
     it('should return magazines with given parameters', async () => {
+      const expectedMagazines: Magazine[] = [
+        {
+          id: '123',
+          magazineName: 'Magazine 1',
+          openDate: new Date('2022-01-01'),
+          closeDate: new Date('2022-06-30'),
+          semesterId: '123456',
+          createdAt: undefined,
+          createdBy: '',
+          updatedAt: undefined,
+          updatedBy: '',
+          deletedAt: undefined,
+          deletedBy: '',
+          semester: undefined,
+          contribution: []
+        }
+      ]
+
+      const mockQueryBuilder: Partial<SelectQueryBuilder<Magazine>> = {
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValueOnce([expectedMagazines, expectedMagazines.length]),
+      };
+
+      const getManyAndCountSpy = jest
+        .spyOn(repository, 'createQueryBuilder')
+        .mockReturnValueOnce(mockQueryBuilder as any);
+
       const params: GetMagazineParams = {
         skip: 0,
         take: 10,
         magazineName: 'Magazine 1',
-        openDate: new Date('2022-01-01'),
-        closeDate: new Date('2022-06-30'),
-        finalCloseDate: new Date('2022-07-30'),
         semesterId: '123456',
+        openDate: undefined,
+        closeDate: undefined,
+        finalCloseDate: undefined
       };
       const pageOptions: PageOptionsDto = new PageOptionsDto();
       pageOptions.page = 1;
       pageOptions.take = 10;
 
       const result = await service.getMagazines(params);
-      expect(result.data).toEqual([]);
-      expect(result.meta.itemCount).toEqual(0);
+      expect(getManyAndCountSpy).toHaveBeenCalledWith('magazine');
+      expect(result.data).toEqual(expect.arrayContaining(expectedMagazines));
+      expect(result.meta.itemCount).toBe(expectedMagazines.length);
       expect(result.message).toBe('Success');
     });
   });

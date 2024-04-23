@@ -59,6 +59,32 @@ export class FacultyService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
+  async getFacultyUserStatistics(): Promise<any[]> {
+    // Tạo một danh sách các faculty kèm theo thông tin về user (student) của mỗi faculty
+    const faculties = await this.facultiesRepository.find({
+      relations: ['student'],
+    });
+
+    // Duyệt qua mỗi faculty để tính tổng số và phần trăm của user trong mỗi faculty
+    const facultyStatistics = faculties.map((faculty) => {
+      // Tính tổng số user trong faculty hiện tại
+      const totalUsers = faculty.student.length;
+      // Tính phần trăm user trong faculty so với tổng số faculty
+      const percentage =
+        totalUsers > 0 ? (totalUsers / faculties.length) * 100 : 0;
+
+      // Trả về thông tin về faculty cùng với tổng số và phần trăm của user
+      return {
+        facultyName: faculty.facultyName,
+        totalUsers,
+        percentage,
+      };
+    });
+
+    // Trả về danh sách các faculty kèm theo thông tin tổng số và phần trăm của user trong mỗi faculty
+    return facultyStatistics;
+  }
+
   async getFacultyById(id: string) {
     const faculty = await this.facultiesRepository
       .createQueryBuilder('faculty')
