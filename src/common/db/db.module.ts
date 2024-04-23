@@ -12,11 +12,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         database: configService.get('DB_NAME'),
         username: configService.get('DB_USER'),
         password: configService.get('DB_PASSWORD'),
-        entities: [__dirname + './../../entities/*{.ts,.js}'],
+        entities: [__dirname +  './../../entities/*{.ts,.js}'],
         synchronize: true,
-        // ssl: {
-        //   rejectUnauthorized: false,
-        // },
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
       inject: [ConfigService],
     }),
