@@ -54,7 +54,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: studentEmail,
       subject: 'Your contribution has been reject!',
-      template: './rejectMail.hbs',
+      template: 'Please check a contribution has been submitted or updated by a student and is awaiting your review.',
       context: {
         contributionId: contributionId,
         name: studentName,
