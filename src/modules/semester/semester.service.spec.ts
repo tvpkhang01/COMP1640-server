@@ -39,9 +39,7 @@ describe('SemesterService', () => {
     service = module.get<SemesterService>(SemesterService);
     entityManager = module.get<EntityManager>(EntityManager);
     repository = module.get<Repository<Semester>>(getRepositoryToken(Semester));
-    module.get<Repository<Magazine>>(
-      getRepositoryToken(Magazine),
-    );
+    module.get<Repository<Magazine>>(getRepositoryToken(Magazine));
   });
 
   it('should be defined', () => {
@@ -81,9 +79,9 @@ describe('SemesterService', () => {
           updatedAt: undefined,
           updatedBy: '',
           deletedAt: undefined,
-          deletedBy: ''
-        }
-      ]
+          deletedBy: '',
+        },
+      ];
 
       const mockQueryBuilder: Partial<SelectQueryBuilder<Semester>> = {
         select: jest.fn().mockReturnThis(),
@@ -91,7 +89,9 @@ describe('SemesterService', () => {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([expectedSemesters, expectedSemesters.length]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValueOnce([expectedSemesters, expectedSemesters.length]),
       };
 
       const getManyAndCountSpy = jest
@@ -211,7 +211,6 @@ describe('SemesterService', () => {
       const studentRepositoryMock = {
         softDelete: softDeleteStudentsMock,
       };
-
 
       const service = new SemesterService(
         semestersRepositoryMock as any,

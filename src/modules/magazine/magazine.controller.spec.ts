@@ -43,9 +43,7 @@ describe('MagazineController', () => {
     controller = module.get<MagazineController>(MagazineController);
     service = module.get<MagazineService>(MagazineService);
     module.get<EntityManager>(EntityManager);
-    module.get<Repository<Magazine>>(
-      getRepositoryToken(Magazine),
-    );
+    module.get<Repository<Magazine>>(getRepositoryToken(Magazine));
   });
 
   it('should be defined', () => {

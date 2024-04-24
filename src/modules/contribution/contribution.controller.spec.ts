@@ -82,26 +82,18 @@ describe('ContributionController', () => {
         MailService,
         ConfigService,
         MagazineService,
-        SemesterService
+        SemesterService,
       ],
     }).compile();
 
     controller = module.get<ContributionController>(ContributionController);
     service = module.get<ContributionService>(ContributionService);
     module.get<EntityManager>(EntityManager);
-    module.get<Repository<Contribution>>(
-      getRepositoryToken(Contribution),
-    );
+    module.get<Repository<Contribution>>(getRepositoryToken(Contribution));
     module.get<Repository<User>>(getRepositoryToken(User));
-    module.get<Repository<Faculty>>(
-      getRepositoryToken(Faculty),
-    );
-    module.get<Repository<Semester>>(
-      getRepositoryToken(Semester),
-    );
-    module.get<Repository<Magazine>>(
-      getRepositoryToken(Magazine),
-    );
+    module.get<Repository<Faculty>>(getRepositoryToken(Faculty));
+    module.get<Repository<Semester>>(getRepositoryToken(Semester));
+    module.get<Repository<Magazine>>(getRepositoryToken(Magazine));
     module.get<JwtService>(JwtService);
     module.get<MailService>(MailService);
     module.get<UserService>(UserService);
@@ -109,7 +101,6 @@ describe('ContributionController', () => {
     module.get<ConfigService>(ConfigService);
     module.get<MagazineService>(MagazineService);
     module.get<SemesterService>(SemesterService);
-
   });
 
   it('should be defined', () => {

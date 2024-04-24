@@ -75,9 +75,9 @@ describe('MagazineService', () => {
           deletedAt: undefined,
           deletedBy: '',
           semester: undefined,
-          contribution: []
-        }
-      ]
+          contribution: [],
+        },
+      ];
 
       const mockQueryBuilder: Partial<SelectQueryBuilder<Magazine>> = {
         select: jest.fn().mockReturnThis(),
@@ -85,7 +85,9 @@ describe('MagazineService', () => {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([expectedMagazines, expectedMagazines.length]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValueOnce([expectedMagazines, expectedMagazines.length]),
       };
 
       const getManyAndCountSpy = jest
@@ -99,7 +101,7 @@ describe('MagazineService', () => {
         semesterId: '123456',
         openDate: undefined,
         closeDate: undefined,
-        finalCloseDate: undefined
+        finalCloseDate: undefined,
       };
       const pageOptions: PageOptionsDto = new PageOptionsDto();
       pageOptions.page = 1;

@@ -60,9 +60,7 @@ describe('UserService', () => {
     cloudinaryService = module.get<CloudinaryService>(CloudinaryService);
     entityManager = module.get<EntityManager>(EntityManager);
     repository = module.get<Repository<User>>(getRepositoryToken(User));
-    module.get<Repository<Contribution>>(
-      getRepositoryToken(Contribution),
-    );
+    module.get<Repository<Contribution>>(getRepositoryToken(Contribution));
     module.get<Repository<ContributionComment>>(
       getRepositoryToken(ContributionComment),
     );
@@ -132,19 +130,21 @@ describe('UserService', () => {
           faculty: null,
           contribution: [],
           contributionComment: [],
-          email: ''
-        }
-      ]
+          email: '',
+        },
+      ];
 
       const mockQueryBuilder: Partial<SelectQueryBuilder<User>> = {
         createQueryBuilder: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         leftJoin: jest.fn().mockReturnThis(),
-        andWhere : jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([expectedUsers, expectedUsers.length]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValueOnce([expectedUsers, expectedUsers.length]),
         getOne: jest.fn().mockResolvedValue(expectedUsers[0]),
       };
 
@@ -164,7 +164,7 @@ describe('UserService', () => {
         dateOfBirth: undefined,
         role: RoleEnum.ADMIN,
         facultyId: '',
-        avatar: ''
+        avatar: '',
       };
       const pageOptions: PageOptionsDto = new PageOptionsDto();
       pageOptions.page = 1;
