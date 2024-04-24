@@ -68,9 +68,9 @@ export class ContributionController {
     return this.contributionService.getContributions(params);
   }
 
-  @Get('contributionLatestMagazine')
+  @Get('contributionLatestSemester')
   async findAllLatestMagazine(@Query() params: GetContributionParams) {
-    return this.contributionService.getContributionsLatestMagazine(params);
+    return this.contributionService.getContributionsLatestSemester(params);
   }
 
   @Get('total')
