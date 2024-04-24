@@ -3,7 +3,13 @@ import { CreateContributionDto } from './dto/create-contribution.dto';
 import { UpdateContributionDto } from './dto/update-contribution.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contribution } from '../../entities/contribution.entity';
-import { Brackets, EntityManager, In, Repository } from 'typeorm';
+import {
+  Brackets,
+  EntityManager,
+  In,
+  LessThanOrEqual,
+  Repository,
+} from 'typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
 import { Order, StatusEnum } from '../../common/enum/enum';
 import { PageMetaDto } from '../../common/dtos/pageMeta';
@@ -157,7 +163,7 @@ export class ContributionService {
       });
     }
     if (params.userId) {
-      contributions.andWhere('student.id = :studentId', {
+      contributions.andWhere('student.id = :userId', {
         userId: params.userId,
       });
     }
@@ -175,34 +181,26 @@ export class ContributionService {
     return new ResponsePaginate(result, pageMetaDto, 'Success');
   }
 
-  async getContributionsLatestMagazine(params: GetContributionParams) {
+  async getContributionsLatestSemester(params: GetContributionParams) {
+    const currentDate = new Date();
     const latestSemesters = await this.semesterRepository.find({
-      order: { createdAt: 'DESC' },
+      where: {
+        startDate: LessThanOrEqual(currentDate),
+      },
+      order: { startDate: 'DESC' },
       take: 1,
     });
     const latestSemester = latestSemesters[0];
-
-    if (!latestSemester) {
-      throw new Error('No semesters available.');
-    }
-
-    const latestMagazines = await this.magazineRepository.find({
-      where: { semesterId: latestSemester.id },
-      order: { createdAt: 'DESC' },
-      take: 1,
-    });
-    const latestMagazine = latestMagazines[0];
-
-    if (!latestMagazine) {
-      throw new Error('No magazines available for the latest semester.');
-    }
 
     const contributions = this.contributionsRepository
       .createQueryBuilder('contribution')
       .select(['contribution', 'student', 'magazine'])
       .leftJoin('contribution.student', 'student')
       .leftJoin('contribution.magazine', 'magazine')
-      .where('magazine.id = :magazineId', { magazineId: latestMagazine.id })
+      .innerJoin('magazine.semester', 'semester')
+      .andWhere('magazine.semesterId = :semesterId', {
+        semesterId: latestSemester.id,
+      })
       .andWhere('contribution.status = ANY(:status)', {
         status: params.status
           ? [params.status]

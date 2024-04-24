@@ -8,7 +8,6 @@ import { GetFacultyParams } from './dto/getList_faculty.dto';
 import { PageOptionsDto } from '../../common/dtos/pageOption';
 import { UpdateFacultyDto } from './dto/update-faculty.dto';
 import { User } from '../../entities/user.entity';
-import { GenderEnum, RoleEnum } from '../../common/enum/enum';
 // import { Order } from 'src/common/enum/enum';
 
 describe('FacultyService', () => {
@@ -43,9 +42,7 @@ describe('FacultyService', () => {
     facultyRepository = module.get<Repository<Faculty>>(
       getRepositoryToken(Faculty),
     );
-    usersRepository = module.get<Repository<User>>(
-      getRepositoryToken(User),
-    );
+    usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -63,16 +60,15 @@ describe('FacultyService', () => {
         faculty: mockFaculty,
         message: 'Successfully create faculty',
       };
-  
+
       jest.spyOn(entityManager, 'save').mockResolvedValueOnce(mockFaculty);
       jest.spyOn(usersRepository, 'findOne').mockResolvedValueOnce(null);
       const result = await service.create(mockCreateFacultyDto);
-  
+
       expect(entityManager.save).toHaveBeenCalledWith(expect.any(Faculty));
-      expect(result).toEqual(expectedResult); 
+      expect(result).toEqual(expectedResult);
     });
   });
-  
 
   describe('getFaculties', () => {
     it('should return faculties with given parameters', async () => {
@@ -89,8 +85,8 @@ describe('FacultyService', () => {
           updatedBy: '',
           deletedAt: undefined,
           deletedBy: '',
-        }
-      ]
+        },
+      ];
 
       const mockQueryBuilder: Partial<SelectQueryBuilder<Faculty>> = {
         select: jest.fn().mockReturnThis(),
@@ -98,7 +94,9 @@ describe('FacultyService', () => {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([expectedFaculties, expectedFaculties.length]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValueOnce([expectedFaculties, expectedFaculties.length]),
       };
 
       const getManyAndCountSpy = jest
@@ -179,10 +177,9 @@ describe('FacultyService', () => {
       const result = await service.update(id, updateFacultyDto);
 
       expect(findOneSpy).toHaveBeenCalledWith({ id });
-      expect(result.message).toEqual("Successfully update faculty");
+      expect(result.message).toEqual('Successfully update faculty');
     });
   });
-  
 
   describe('remove', () => {
     it('should remove faculty successfully', async () => {
@@ -209,12 +206,12 @@ describe('FacultyService', () => {
 
       const usersRepositoryMock = {
         softDelete: softDeleteStudentsMock,
-      }
+      };
 
       const service = new FacultyService(
         facultiesRepositoryMock as any,
         studentRepositoryMock as any,
-        usersRepositoryMock as any
+        usersRepositoryMock as any,
       );
 
       // Call the remove method with a valid ID
@@ -252,11 +249,11 @@ describe('FacultyService', () => {
       };
 
       const entityManagerMock = {};
-      const usersRepositoryMock = {}
+      const usersRepositoryMock = {};
       const service = new FacultyService(
         facultiesRepositoryMock as any,
         entityManagerMock as any,
-        usersRepositoryMock as any
+        usersRepositoryMock as any,
       );
 
       // Call the remove method with an invalid ID
