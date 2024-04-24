@@ -13,7 +13,6 @@ import {
 } from '../../common/enum/enum';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { GetContributionParams } from './dto/getList_contribition.dto';
-import { PageOptionsDto } from '../../common/dtos/pageOption';
 import { UserService } from '../user/user.service';
 import { User } from '../../entities/user.entity';
 import { Faculty } from '../../entities/faculty.entity';
@@ -99,7 +98,7 @@ describe('ContributionService', () => {
         FacultyService,
         ConfigService,
         MagazineService,
-        SemesterService
+        SemesterService,
       ],
     }).compile();
 
@@ -109,15 +108,9 @@ describe('ContributionService', () => {
       getRepositoryToken(Contribution),
     );
     module.get<Repository<User>>(getRepositoryToken(User));
-    module.get<Repository<Faculty>>(
-      getRepositoryToken(Faculty),
-    );
-    module.get<Repository<Semester>>(
-      getRepositoryToken(Semester),
-    );
-    module.get<Repository<Magazine>>(
-      getRepositoryToken(Magazine),
-    );
+    module.get<Repository<Faculty>>(getRepositoryToken(Faculty));
+    module.get<Repository<Semester>>(getRepositoryToken(Semester));
+    module.get<Repository<Magazine>>(getRepositoryToken(Magazine));
     module.get<JwtService>(JwtService);
     mailService = module.get<MailService>(MailService);
     userService = module.get<UserService>(UserService);
@@ -240,7 +233,7 @@ describe('ContributionService', () => {
     it('should return contributions with given parameters', async () => {
       const contributions: Contribution[] = [
         {
-          id: "1",
+          id: '1',
           title: 'Example Contribution 1',
           fileImage: [],
           fileDocx: [],
@@ -259,7 +252,7 @@ describe('ContributionService', () => {
           deletedBy: '',
         },
         {
-          id: "2",
+          id: '2',
           title: 'Example Contribution 2',
           fileImage: [],
           fileDocx: [],
@@ -285,21 +278,31 @@ describe('ContributionService', () => {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValueOnce([contributions, contributions.length]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValueOnce([contributions, contributions.length]),
       };
 
       const getManyAndCountSpy = jest
         .spyOn(contributionsRepository, 'createQueryBuilder')
         .mockReturnValueOnce(mockQueryBuilder as any);
 
-      const statusValues = [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT];
+      const statusValues = [
+        StatusEnum.APPROVE,
+        StatusEnum.PENDING,
+        StatusEnum.REJECT,
+      ];
       const params: GetContributionParams = {
-        status: statusValues ?? [StatusEnum.APPROVE, StatusEnum.PENDING, StatusEnum.REJECT],
+        status: statusValues ?? [
+          StatusEnum.APPROVE,
+          StatusEnum.PENDING,
+          StatusEnum.REJECT,
+        ],
         skip: 0,
         take: 10,
         order: Order.ASC,
-        search: 'example', 
-        facultyId: "1",
+        search: 'example',
+        facultyId: '1',
         title: 'abcd',
         filePaths: [],
       };
@@ -308,13 +311,12 @@ describe('ContributionService', () => {
 
       expect(getManyAndCountSpy).toHaveBeenCalledWith('contribution');
       expect(result.data).toEqual(expect.arrayContaining(contributions));
-      expect(result.data.length).toBe(contributions.length); 
+      expect(result.data.length).toBe(contributions.length);
 
       expect(result.meta.itemCount).toBe(contributions.length);
-      expect(result.message).toBe('Success'); 
+      expect(result.message).toBe('Success');
     });
   });
-  
 
   describe('getContributionById', () => {
     it('should return contribution with given id', async () => {

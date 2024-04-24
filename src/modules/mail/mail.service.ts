@@ -18,7 +18,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: mcEmail,
       subject: 'Have a contribution need check!',
-      template: '     Please check a contribution has been submitted or updated by a student and is awaiting your review.',
+      template: './pendingMail.hbs',
       context: {
         contributionId: contributionId,
         name: mcName,
@@ -36,7 +36,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: studentEmail,
       subject: 'Your contribution has been approve!',
-      template: '     Please check a contribution has been submitted or updated by a student and is awaiting your review.',
+      template: './approveMail.hbs',
       context: {
         contributionId: contributionId,
         name: studentName,

@@ -48,12 +48,8 @@ describe('FacultyController', () => {
     controller = module.get<FacultyController>(FacultyController);
     service = module.get<FacultyService>(FacultyService);
     module.get<EntityManager>(EntityManager);
-    module.get<Repository<Faculty>>(
-      getRepositoryToken(Faculty),
-    );
-    module.get<Repository<User>>(
-      getRepositoryToken(User),
-    );
+    module.get<Repository<Faculty>>(getRepositoryToken(Faculty));
+    module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {

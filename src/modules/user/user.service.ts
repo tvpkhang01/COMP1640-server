@@ -61,19 +61,14 @@ export class UserService {
   }
 
   async getTotalUser(period: string) {
-    // Đếm tổng số người dùng hiện có
     const total = await this.usersRepository.count();
 
-    // Tính năm trước
     const pastYear = new Date();
     pastYear.setFullYear(pastYear.getFullYear() - 1);
 
-    // Khai báo các biến để lưu trữ số lượng người dùng cũ và hiện tại
     let oldCount, currentCount;
 
-    // Nếu khoảng thời gian là 'năm'
     if (period === 'year') {
-      // Đếm số lượng người dùng trong năm trước và năm hiện tại
       oldCount = await this.usersRepository
         .createQueryBuilder('user')
         .where('EXTRACT(YEAR FROM user.createdAt) = :pastYear', {

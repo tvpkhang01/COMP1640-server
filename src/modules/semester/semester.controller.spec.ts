@@ -43,9 +43,7 @@ describe('SemesterController', () => {
     controller = module.get<SemesterController>(SemesterController);
     service = module.get<SemesterService>(SemesterService);
     module.get<EntityManager>(EntityManager);
-    module.get<Repository<Semester>>(
-      getRepositoryToken(Semester),
-    );
+    module.get<Repository<Semester>>(getRepositoryToken(Semester));
   });
 
   it('should be defined', () => {

@@ -18,14 +18,16 @@ export class FacultyService {
     private readonly entityManager: EntityManager,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async create(createFacultyDto: CreateFacultyDto) {
     try {
       const faculty = new Faculty(createFacultyDto);
       const savedFaculty = await this.entityManager.save(faculty);
 
-      const user = await this.usersRepository.findOne({ where: { id: createFacultyDto.coordinatorId } });
+      const user = await this.usersRepository.findOne({
+        where: { id: createFacultyDto.coordinatorId },
+      });
       if (user) {
         user.facultyId = savedFaculty.id;
         await this.entityManager.save(user);
@@ -36,7 +38,6 @@ export class FacultyService {
       throw error;
     }
   }
-
 
   async getFaculties(params: GetFacultyParams) {
     const faculties = this.facultiesRepository
@@ -106,14 +107,18 @@ export class FacultyService {
       if (faculty.coordinatorId !== updateFacultyDto.coordinatorId) {
         const oldCoordinatorId = faculty.coordinatorId;
         if (oldCoordinatorId) {
-          const oldCoordinator = await this.usersRepository.findOne({ where: { id: oldCoordinatorId } });
+          const oldCoordinator = await this.usersRepository.findOne({
+            where: { id: oldCoordinatorId },
+          });
           if (oldCoordinator) {
             oldCoordinator.facultyId = null;
             await this.entityManager.save(oldCoordinator);
           }
         }
 
-        const user = await this.usersRepository.findOne({ where: { id: updateFacultyDto.coordinatorId } });
+        const user = await this.usersRepository.findOne({
+          where: { id: updateFacultyDto.coordinatorId },
+        });
         if (user) {
           user.facultyId = faculty.id;
           await this.entityManager.save(user);
@@ -124,7 +129,10 @@ export class FacultyService {
       faculty.coordinatorId = updateFacultyDto.coordinatorId;
       const updatedFaculty = await this.entityManager.save(faculty);
 
-      return { faculty: updatedFaculty, message: 'Successfully update faculty' };
+      return {
+        faculty: updatedFaculty,
+        message: 'Successfully update faculty',
+      };
     } catch (error) {
       throw error;
     }
